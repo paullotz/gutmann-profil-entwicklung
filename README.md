@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bank Gutmann - Financial Health Check
+
+A comprehensive AI-powered financial health assessment tool built with Next.js 15, React, and TypeScript.
+
+## Features
+
+- Multi-step financial assessment questionnaire
+- AI-powered analysis using Google Gemini
+- Interactive radar chart visualization
+- Responsive design with Tailwind CSS v4
+- shadcn/ui components with custom accent color (#749381)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
+- Node.js 18+ 
+- npm, yarn, or pnpm
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+   \`\`\`bash
+   npm install
+   \`\`\`
+
+3. Set up environment variables:
+   - Add your Gemini API key in the **Vars** section of the v0 in-chat sidebar, or
+   - Create a \`.env.local\` file based on \`.env.example\`:
+     \`\`\`bash
+     cp .env.example .env.local
+     \`\`\`
+   - Add your API key:
+     \`\`\`
+     GEMINI_API_KEY=your_actual_api_key
+     \`\`\`
+
+### Development
+
+Run the development server:
+
+\`\`\`bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+\`\`\`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app will be available at \`http://localhost:3000\`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Build for production:
 
-## Learn More
+\`\`\`bash
+npm run build
+\`\`\`
 
-To learn more about Next.js, take a look at the following resources:
+Start the production server:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+\`\`\`bash
+npm run start
+\`\`\`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+\`\`\`
+app/
+├── actions/
+│   └── analyze.ts          # Server action for AI analysis
+├── layout.tsx              # Root layout
+├── page.tsx                # Home page
+└── globals.css             # Global styles with Tailwind v4
+components/
+├── ui/                     # shadcn/ui components
+├── App.tsx                 # Main application component
+├── RadarChartComponent.tsx # Chart visualization
+└── icons.tsx               # Icon components
+lib/
+└── utils.ts                # Utility functions
+services/
+└── geminiService.ts        # (deprecated - moved to server action)
+types.ts                    # TypeScript type definitions
+\`\`\`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Technologies
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Next.js 15 (App Router)
+- React 19
+- TypeScript
+- Tailwind CSS v4
+- shadcn/ui components
+- Recharts
+- Google Gemini AI
+- Radix UI primitives
+
+## Environment Variables
+
+The app requires the following environment variable:
+
+- \`GEMINI_API_KEY\`: Your Google Gemini API key (server-side only for security)
+
+You can set this in the v0 **Vars** section or in a \`.env.local\` file.
