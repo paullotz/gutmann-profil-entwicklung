@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useCallback, useMemo } from "react"
-import type { FormData, Step1Data, Step2Data, GeminiAnalysis } from "@/types"
+import type { FormData, Step1Data, Step2Data, GeminiAnalysis } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"

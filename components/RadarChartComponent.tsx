@@ -1,6 +1,6 @@
 import type React from "react"
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Legend } from "recharts"
-import type { GeminiAnalysis } from "@/types"
+import type { GeminiAnalysis } from "@/lib/types"
 
 interface RadarChartComponentProps {
   data: GeminiAnalysis["chartData"]
