@@ -694,8 +694,11 @@ const Step6_Results: React.FC<{ data: FormData }> = ({ data }) => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [consultationCode] = useState(generateConsultationCode());
+	const [consultationCode, setConsultationCode] = useState<string>("");
 	const [isCopied, setIsCopied] = useState(false);
+	const [consentToSave, setConsentToSave] = useState(false);
+	const [isSaving, setIsSaving] = useState(false);
+	const [saveSuccess, setSaveSuccess] = useState(false);
 
 	const fetchAnalysis = useCallback(async () => {
 		setIsLoading(true);
@@ -712,8 +715,42 @@ const Step6_Results: React.FC<{ data: FormData }> = ({ data }) => {
 
 	useEffect(() => {
 		fetchAnalysis();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [fetchAnalysis]);
+
+	const handleSaveData = async () => {
+		if (!consentToSave) return;
+		
+		setIsSaving(true);
+		setSaveSuccess(false);
+		
+		try {
+			const response = await fetch('/api/data', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					formData: data,
+					analysis: analysis,
+				}),
+			});
+
+			const result = await response.json();
+
+			if (result.success) {
+				const generatedCode = result.data.consultationCode;
+				setConsultationCode(generatedCode);
+				setSaveSuccess(true);
+			} else {
+				setError("Fehler beim Speichern der Daten.");
+			}
+		} catch (error) {
+			console.error('Error saving data:', error);
+			setError("Fehler beim Speichern der Daten.");
+		} finally {
+			setIsSaving(false);
+		}
+	};
 
 	const handleCopy = () => {
 		navigator.clipboard.writeText(consultationCode).then(() => {
@@ -722,59 +759,166 @@ const Step6_Results: React.FC<{ data: FormData }> = ({ data }) => {
 		});
 	};
 
-	if (isLoading) return (<div className="text-center p-8"><LoaderCircle className="animate-spin rounded-full h-12 w-12 mx-auto mb-4" /><p>Ihre persönliche Analyse wird erstellt...</p></div>);
-	if (error || !analysis) return <div className="text-center p-8 text-destructive">{error || "Analyse konnte nicht geladen werden."}</div>;
+	if (isLoading) return (
+		<div className="text-center p-8">
+			<LoaderCircle className="animate-spin rounded-full h-12 w-12 mx-auto mb-4" />
+			<p>Ihre persönliche Analyse wird erstellt...</p>
+		</div>
+	);
+	
+	if (error || !analysis) return (
+		<div className="text-center p-8 text-destructive">
+			{error || "Analyse konnte nicht geladen werden."}
+		</div>
+	);
 
-	const scoreColors: Record<string, string> = { Ausgezeichnet: "text-green-600 bg-green-100", Gut: "text-green-600 bg-green-100", Solide: "text-yellow-600 bg-yellow-100", Optimierungsbedarf: "text-orange-600 bg-orange-100" };
+	const scoreColors: Record<string, string> = { 
+		Ausgezeichnet: "text-green-600 bg-green-100", 
+		Gut: "text-green-600 bg-green-100", 
+		Solide: "text-yellow-600 bg-yellow-100", 
+		Optimierungsbedarf: "text-orange-600 bg-orange-100" 
+	};
 
 	return (
 		<div className="space-y-6">
 			<Card className="shadow-sm">
 				<CardHeader>
 					<CardTitle>Ihr Finanz-Ergebnis</CardTitle>
-					<div className={`inline-block px-3 py-1 text-sm font-semibold rounded-full w-fit ${scoreColors[analysis.scoreText] || "bg-gray-100"}`}>{analysis.scoreText}</div>
-				</CardHeader>
-				<CardContent className="pt-6"><p>{analysis.analyse}</p></CardContent>
-			</Card>
-			<Card className="shadow-sm">
-				<CardHeader><CardTitle>Profil-Übersicht</CardTitle></CardHeader>
-				<CardContent className="pt-0"><RadarChartComponent data={analysis.chartData} /></CardContent>
-			</Card>
-            <Card className="shadow-sm">
-                <CardHeader><CardTitle>Ihre Detail-Analyse</CardTitle><CardDescription>Hier sehen Sie eine Aufschlüsselung Ihrer Ergebnisse in den Kernbereichen.</CardDescription></CardHeader>
-                <CardContent className="pt-6 space-y-4">
-                    {analysis.detailedAnalysis.map((detail, index) => {
-                        const chartItem = analysis.chartData.find(item => item.subject === detail.subject);
-                        const score = chartItem ? chartItem.value : 0;
-                        const scoreColor = score >= 75 ? 'text-green-600' : score >= 50 ? 'text-yellow-600' : 'text-orange-600';
-
-                        return (
-                            <div key={index} className="p-4 rounded-lg bg-muted/50">
-                                <div className="flex justify-between items-center mb-1">
-                                    <h4 className="font-semibold">{detail.subject}</h4>
-                                    <span className={`font-bold text-lg ${scoreColor}`}>{score} / 100</span>
-                                </div>
-                                <p className="text-sm text-muted-foreground">{detail.explanation}</p>
-                            </div>
-                        )
-                    })}
-                </CardContent>
-            </Card>
-			<Card className="bg-muted/50 border-primary shadow-sm">
-				<CardContent className="pt-6 text-center">
-					<h3 className="text-xl font-semibold mb-2">Der nächste Schritt? Ein persönliches Gespräch.</h3>
-					<p className="text-muted-foreground mb-4">Ihr Code schaltet eine persönliche Besprechung Ihrer Ergebnisse frei. Ein Bank Gutmann Experte kann Ihnen helfen, die nächsten Schritte zu planen.</p>
-					<div className="my-6">
-						<Label className="text-sm text-muted-foreground">Ihr persönlicher Beratungscode</Label>
-						<div className="flex items-center justify-center gap-2 mt-1">
-							<span className="text-2xl font-mono p-2 bg-background border rounded-md">{consultationCode}</span>
-							<Button variant="ghost" size="icon" onClick={handleCopy}>{isCopied ? "Kopiert!" : <CopyIcon />}</Button>
-						</div>
+					<div className={`inline-block px-3 py-1 text-sm font-semibold rounded-full w-fit ${scoreColors[analysis.scoreText] || "bg-gray-100"}`}>
+						{analysis.scoreText}
 					</div>
-					<Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto" size="lg"><CalendarIcon className="mr-2" />Jetzt Experten-Gespräch anfordern</Button>
+				</CardHeader>
+				<CardContent className="pt-6">
+					<p>{analysis.analyse}</p>
 				</CardContent>
 			</Card>
-			{isModalOpen && <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center" onClick={() => setIsModalOpen(false)}><div className="bg-background p-6 rounded-lg shadow-lg w-full max-w-sm" onClick={(e) => e.stopPropagation()}><h3 className="text-lg font-semibold mb-2">Beratungstermin vereinbaren</h3><div className="text-center"><p className="mb-4">Vielen Dank für Ihr Interesse! Dieses Feature ist im Prototyp nicht implementiert.</p><Button onClick={() => setIsModalOpen(false)}>Schließen</Button></div></div></div>}
+
+			<Card className="shadow-sm">
+				<CardHeader>
+					<CardTitle>Profil-Übersicht</CardTitle>
+				</CardHeader>
+				<CardContent className="pt-0">
+					<RadarChartComponent data={analysis.chartData} />
+				</CardContent>
+			</Card>
+
+			<Card className="shadow-sm">
+				<CardHeader>
+					<CardTitle>Ihre Detail-Analyse</CardTitle>
+					<CardDescription>Hier sehen Sie eine Aufschlüsselung Ihrer Ergebnisse in den Kernbereichen.</CardDescription>
+				</CardHeader>
+				<CardContent className="pt-6 space-y-4">
+					{analysis.detailedAnalysis.map((detail, index) => {
+						const chartItem = analysis.chartData.find(item => item.subject === detail.subject);
+						const score = chartItem ? chartItem.value : 0;
+						const scoreColor = score >= 75 ? 'text-green-600' : score >= 50 ? 'text-yellow-600' : 'text-orange-600';
+
+						return (
+							<div key={index} className="p-4 rounded-lg bg-muted/50">
+								<div className="flex justify-between items-center mb-1">
+									<h4 className="font-semibold">{detail.subject}</h4>
+									<span className={`font-bold text-lg ${scoreColor}`}>{score} / 100</span>
+								</div>
+								<p className="text-sm text-muted-foreground">{detail.explanation}</p>
+							</div>
+						)
+					})}
+				</CardContent>
+			</Card>
+
+			<Card className="bg-muted/50 border-primary shadow-sm">
+				<CardContent className="pt-6">
+					{!saveSuccess ? (
+						<div className="space-y-4">
+							<div className="text-center">
+								<h3 className="text-xl font-semibold mb-2">Möchten Sie Ihre Ergebnisse speichern?</h3>
+								<p className="text-muted-foreground mb-4">
+									Speichern Sie Ihre Analyse, um einen persönlichen Beratungscode zu erhalten. 
+									Mit diesem Code können Sie später auf Ihre Ergebnisse zugreifen und ein Expertengespräch anfordern.
+								</p>
+							</div>
+
+							<div className="flex items-start space-x-2 p-4 border rounded-lg bg-background">
+								<Checkbox 
+									id="consent" 
+									checked={consentToSave}
+									onCheckedChange={(checked) => setConsentToSave(checked as boolean)}
+								/>
+								<div className="grid gap-1.5 leading-none">
+									<Label
+										htmlFor="consent"
+										className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+									>
+										Ich stimme der Speicherung meiner Daten zu
+									</Label>
+									<p className="text-sm text-muted-foreground">
+										Ihre Daten werden verschlüsselt gespeichert und nur für die Beratung verwendet. 
+										Sie können jederzeit die Löschung beantragen.
+									</p>
+								</div>
+							</div>
+
+							<Button 
+								onClick={handleSaveData}
+								disabled={!consentToSave || isSaving}
+								className="w-full"
+								size="lg"
+							>
+								{isSaving ? (
+									<>
+										<LoaderCircle className="animate-spin mr-2 h-4 w-4" />
+										Wird gespeichert...
+									</>
+								) : (
+									"Daten speichern & Code erhalten"
+								)}
+							</Button>
+						</div>
+					) : (
+						<div className="text-center space-y-4">
+							<div className="inline-block p-3 bg-green-100 rounded-full mb-2">
+								<svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+								</svg>
+							</div>
+							<h3 className="text-xl font-semibold">Erfolgreich gespeichert!</h3>
+							<p className="text-muted-foreground">
+								Ihre Analyse wurde gespeichert. Hier ist Ihr persönlicher Beratungscode:
+							</p>
+							<div className="my-6">
+								<Label className="text-sm text-muted-foreground">Ihr persönlicher Beratungscode</Label>
+								<div className="flex items-center justify-center gap-2 mt-2">
+									<span className="text-2xl font-mono p-3 bg-background border-2 border-primary rounded-md">
+										{consultationCode}
+									</span>
+									<Button variant="ghost" size="icon" onClick={handleCopy}>
+										{isCopied ? "✓" : <CopyIcon />}
+									</Button>
+								</div>
+								<p className="text-xs text-muted-foreground mt-2">
+									Bewahren Sie diesen Code auf, um später auf Ihre Ergebnisse zuzugreifen
+								</p>
+							</div>
+							<Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto" size="lg">
+								<CalendarIcon className="mr-2" />
+								Jetzt Experten-Gespräch anfordern
+							</Button>
+						</div>
+					)}
+				</CardContent>
+			</Card>
+
+			{isModalOpen && (
+				<div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center" onClick={() => setIsModalOpen(false)}>
+					<div className="bg-background p-6 rounded-lg shadow-lg w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
+						<h3 className="text-lg font-semibold mb-2">Beratungstermin vereinbaren</h3>
+						<div className="text-center">
+							<p className="mb-4">Vielen Dank für Ihr Interesse! Dieses Feature ist im Prototyp nicht implementiert.</p>
+							<Button onClick={() => setIsModalOpen(false)}>Schließen</Button>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 };

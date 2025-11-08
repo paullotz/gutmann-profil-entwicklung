@@ -1,0 +1,33 @@
+CREATE TABLE "financial_checks" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"consultation_code" text NOT NULL,
+	"life_phase" text NOT NULL,
+	"goals" jsonb NOT NULL,
+	"goal_details" jsonb NOT NULL,
+	"income" text,
+	"expenses" text,
+	"assets" text,
+	"liabilities" text,
+	"pension_gap" text,
+	"equity_for_real_estate" text,
+	"money_feelings" jsonb NOT NULL,
+	"lifestyle_vs_security" integer NOT NULL,
+	"retirement_confidence" integer,
+	"financial_knowledge" integer NOT NULL,
+	"decision_style" text,
+	"investment_experience" text NOT NULL,
+	"scenario" text,
+	"scenario_options" jsonb,
+	"scenario_answer" text,
+	"risk_profile_answers" jsonb NOT NULL,
+	"financial_worries" text,
+	"analysis_score" text,
+	"analysis_text" text,
+	"chart_data" jsonb,
+	"detailed_analysis" jsonb,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "financial_checks_consultation_code_unique" UNIQUE("consultation_code")
+);
+--> statement-breakpoint
+DROP TABLE "entries" CASCADE;

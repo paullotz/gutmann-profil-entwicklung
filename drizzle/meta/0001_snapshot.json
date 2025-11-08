@@ -1,0 +1,210 @@
+{
+  "id": "0343a617-8c86-49a2-9898-cfadb90fe009",
+  "prevId": "bb00cb6c-ac57-4621-aab1-ffd620e2bc44",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.financial_checks": {
+      "name": "financial_checks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "consultation_code": {
+          "name": "consultation_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "life_phase": {
+          "name": "life_phase",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "goals": {
+          "name": "goals",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "goal_details": {
+          "name": "goal_details",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "income": {
+          "name": "income",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expenses": {
+          "name": "expenses",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "assets": {
+          "name": "assets",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "liabilities": {
+          "name": "liabilities",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pension_gap": {
+          "name": "pension_gap",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "equity_for_real_estate": {
+          "name": "equity_for_real_estate",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "money_feelings": {
+          "name": "money_feelings",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lifestyle_vs_security": {
+          "name": "lifestyle_vs_security",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "retirement_confidence": {
+          "name": "retirement_confidence",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "financial_knowledge": {
+          "name": "financial_knowledge",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "decision_style": {
+          "name": "decision_style",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "investment_experience": {
+          "name": "investment_experience",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "scenario": {
+          "name": "scenario",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scenario_options": {
+          "name": "scenario_options",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scenario_answer": {
+          "name": "scenario_answer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "risk_profile_answers": {
+          "name": "risk_profile_answers",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "financial_worries": {
+          "name": "financial_worries",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "analysis_score": {
+          "name": "analysis_score",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "analysis_text": {
+          "name": "analysis_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "chart_data": {
+          "name": "chart_data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "detailed_analysis": {
+          "name": "detailed_analysis",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "financial_checks_consultation_code_unique": {
+          "name": "financial_checks_consultation_code_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "consultation_code"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
