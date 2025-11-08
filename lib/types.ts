@@ -1,8 +1,3 @@
-export interface GoalDetails {
-    priority: number;
-    horizon: string;
-}
-
 export interface Step1Data {
   lifePhase: string;
   goals: {
@@ -12,11 +7,16 @@ export interface Step1Data {
     other: boolean;
   };
   goalDetails: {
-    retirement: GoalDetails;
-    realEstate: GoalDetails;
-    wealth: GoalDetails;
-    other: GoalDetails;
+    retirement: GoalDetail;
+    realEstate: GoalDetail;
+    wealth: GoalDetail;
+    other: GoalDetail;
   };
+}
+
+export interface GoalDetail {
+  priority: number;
+  horizon: string;
 }
 
 export interface Step2Data {
@@ -24,21 +24,34 @@ export interface Step2Data {
   expenses: string;
   assets: string;
   liabilities: string;
-  pensionGap?: string;
-  equityForRealEstate?: string;
+  pensionGap: string;
+  equityForRealEstate: string;
 }
 
 export interface Step3Data {
   moneyFeelings: string[];
   lifestyleVsSecurity: number;
-  retirementConfidence?: number;
+  retirementConfidence: number;
+  financialKnowledge: number;
+  decisionStyle: string;
+  investmentExperience: string;
+}
+
+export interface ScenarioOption {
+    title: string;
+    description: string;
+    value: string;
 }
 
 export interface Step4Data {
-  riskReaction: string;
-  financialWorries?: string;
-  scenarioQuestion: string; // Store the exact question asked
-  scenarioType: string; // e.g., 'portfolio_loss', 'opportunity', 'inflation'
+    scenario: string;
+    options: ScenarioOption[];
+    answer: string;
+}
+
+export interface Step5Data {
+  riskProfileAnswers: Record<string, string>;
+  financialWorries: string;
 }
 
 export interface FormData {
@@ -46,17 +59,23 @@ export interface FormData {
   step2: Step2Data;
   step3: Step3Data;
   step4: Step4Data;
+  step5: Step5Data;
 }
 
 export interface GeminiAnalysis {
-    analyse: string;
-    scoreText: string;
-    chartData: {
-        risiko: number;
-        sparen: number;
-        planung: number;
-        liquiditaet: number;
-        vermoegen: number;
-        lifestyle: number;
-    }
+  scoreText: string;
+  analyse: string;
+  chartData: {
+    subject: string;
+    value: number;
+  }[];
+  detailedAnalysis: {
+    subject: string;
+    explanation: string;
+  }[];
+}
+
+export interface GeneratedScenario {
+    scenario: string;
+    options: ScenarioOption[];
 }

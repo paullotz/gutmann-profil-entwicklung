@@ -1,34 +1,28 @@
-import type React from "react"
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Legend } from "recharts"
-import type { GeminiAnalysis } from "@/lib/types"
+import React from 'react';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
-interface RadarChartComponentProps {
-  data: GeminiAnalysis["chartData"]
+interface RadarChartProps {
+  data: {
+    subject: string;
+    value: number;
+  }[];
 }
 
-const RadarChartComponent: React.FC<RadarChartComponentProps> = ({ data }) => {
-  const chartData = [
-    { subject: "Risiko", A: data.risiko, fullMark: 100 },
-    { subject: "Sparen", A: data.sparen, fullMark: 100 },
-    { subject: "Planung", A: data.planung, fullMark: 100 },
-    { subject: "Liquidität", A: data.liquiditaet, fullMark: 100 },
-    { subject: "Vermögen", A: data.vermoegen, fullMark: 100 },
-    { subject: "Lifestyle", A: data.lifestyle, fullMark: 100 },
-  ]
-
+const RadarChartComponent: React.FC<RadarChartProps> = ({ data }) => {
   return (
-    <div className="w-full h-80">
+    <div style={{ width: '100%', height: 350 }}>
       <ResponsiveContainer>
-        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
+        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
           <PolarGrid />
           <PolarAngleAxis dataKey="subject" />
           <PolarRadiusAxis angle={30} domain={[0, 100]} />
-          <Radar name="Ihr Profil" dataKey="A" stroke="#749381" fill="#749381" fillOpacity={0.6} />
+          <Radar name="Ihr Profil" dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} />
+          <Tooltip />
           <Legend />
         </RadarChart>
       </ResponsiveContainer>
     </div>
-  )
-}
+  );
+};
 
-export default RadarChartComponent
+export default RadarChartComponent;

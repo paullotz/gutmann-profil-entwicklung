@@ -1,152 +1,176 @@
 "use server"
 
-import { GoogleGenAI, Type } from "@google/genai"
-import type { FormData, GeminiAnalysis } from "@/lib/types"
+import { GoogleGenAI, Type } from "@google/genai";
+import type { FormData, GeminiAnalysis, GeneratedScenario } from '../../lib/types';
 
-const resultSchema = {
-	type: Type.OBJECT,
-	properties: {
-		analyse: {
-			type: Type.STRING,
-			description:
-				"Eine kurze, positive und hilfreiche Finanzanalyse in 2-3 Sätzen auf Deutsch. Sprich den Nutzer direkt mit 'Sie' an.",
-		},
-		scoreText: {
-			type: Type.STRING,
-			description: "Ein Gesamtscore als einzelnes Wort: 'Ausgezeichnet', 'Gut', 'Solide', oder 'Optimierungsbedarf'.",
-		},
-		chartData: {
-			type: Type.OBJECT,
-			properties: {
-				risiko: {
-					type: Type.NUMBER,
-					description: "Risikobereitschaft Score (0-100), basierend auf der Reaktion auf Marktverluste.",
-				},
-				sparen: {
-					type: Type.NUMBER,
-					description: "Sparquote & Disziplin Score (0-100), basierend auf Einkommen, Ausgaben und Vermögen.",
-				},
-				planung: {
-					type: Type.NUMBER,
-					description: "Langfristige Planung Score (0-100), basierend auf Zielen wie Altersvorsorge.",
-				},
-				liquiditaet: {
-					type: Type.NUMBER,
-					description: "Liquidität & Sicherheitspolster Score (0-100), basierend auf liquiden Mitteln vs. Ausgaben.",
-				},
-				vermoegen: {
-					type: Type.NUMBER,
-					description: "Vermögensaufbau-Potenzial Score (0-100), basierend auf Zielen, Vermögen und Verbindlichkeiten.",
-				},
-				lifestyle: {
-					type: Type.NUMBER,
-					description: "Balance zwischen Lifestyle und Sparen Score (0-100), basierend auf dem 'Money Mindset' Slider.",
-				},
-			},
-			required: ["risiko", "sparen", "planung", "liquiditaet", "vermoegen", "lifestyle"],
-		},
-	},
-	required: ["analyse", "scoreText", "chartData"],
+const API_KEY = process.env.GEMINI_API_KEY;
+
+if (!API_KEY) {
+  console.warn("API_KEY environment variable not set. Using a placeholder. Please set your API key.");
 }
+const ai = new GoogleGenAI({ apiKey: API_KEY || "YOUR_API_KEY_HERE" });
 
-function formatPrompt(data: FormData): string {
-	const selectedGoals = (Object.keys(data.step1.goals) as Array<keyof typeof data.step1.goals>).filter(
-		(key) => data.step1.goals[key],
-	)
+export async function generateDynamicScenario(data: Pick<FormData, 'step1' | 'step2' | 'step3'>): Promise<GeneratedScenario> {
+    const relevantGoals = Object.entries(data.step1.goals)
+      .filter(([, checked]) => checked)
+      .map(([key]) => key)
+      .join(", ") || "allgemeiner Vermögensaufbau";
 
-	const goalDetailsString = selectedGoals
-		.map((key) => {
-			const details = data.step1.goalDetails[key]
-			const goalLabels = {
-				retirement: "Altersvorsorge",
-				realEstate: "Immobilie",
-				wealth: "Vermögensaufbau",
-				other: "Andere",
-			}
-			return `- Ziel: ${goalLabels[key]}, Priorität: ${details.priority}/100, Zeithorizont: ${details.horizon}`
-		})
-		.join("\n    ")
+    const prompt = `
+        Basierend auf den folgenden Benutzerdaten, generiere ein einziges, personalisiertes Finanzszenario.
+        Das Szenario soll ein realistisches Dilemma oder eine Entscheidungssituation darstellen, die für den Benutzer relevant ist.
+        Die Sprache muss klar, verständlich und neutral sein.
 
-	const goalsSection = selectedGoals.length > 0 ? `\n    ${goalDetailsString}` : " Keine Angabe"
+        **Benutzerdaten:**
+        - Lebensphase: ${data.step1.lifePhase}
+        - Hauptziele: ${relevantGoals}
+        - Monatliches Einkommen: ${data.step2.income} EUR
+        - Monatliche Ausgaben: ${data.step2.expenses} EUR
+        - Liquides Vermögen: ${data.step2.assets} EUR
+        - Gefühle zu Geld: ${data.step3.moneyFeelings.join(", ")}
+        - Investment-Erfahrung: ${data.step3.investmentExperience}
 
-	return `
-    Führe eine kurze Finanzgesundheitsanalyse für einen Bankkunden durch.
-    Gib die Antwort ausschließlich im angeforderten JSON-Format zurück.
-    
-    Hier sind die Daten des Kunden:
+        **Anforderungen:**
+        1.  **Szenario-Relevanz**: Das Szenario muss direkt auf die Ziele und die finanzielle Situation des Benutzers zugeschnitten sein.
+            (z.B. Immobilien-Szenario bei Immobilien-Ziel, Anlage-Chance bei Vermögensaufbau-Ziel etc.)
+        2.  **Drei Optionen**: Biete genau drei Handlungsoptionen an. Jede Option muss einen unterschiedlichen psychologischen Ansatz repräsentieren (z.B. risikoscheu/sicherheitsorientiert, ausgewogen/analytisch, risikofreudig/opportunistisch).
+        3.  **Antwortformat**: Deine Antwort MUSS ein valides JSON-Objekt sein, das exakt dem folgenden Schema entspricht. Füge keine Erklärungen außerhalb des JSON-Objekts hinzu.
 
-    **Schritt 1: Lebenssituation & Finanzziele**
-    - Lebensphase: ${data.step1.lifePhase}
-    - Wichtige Ziele & Details:${goalsSection}
+        \`\`\`json
+        {
+          "scenario": "Eine detaillierte, aber prägnante Beschreibung der Situation...",
+          "options": [
+            { "title": "Kurzer, prägnanter Titel für Option 1", "description": "Beschreibung der ersten Handlungsoption.", "value": "option_a" },
+            { "title": "Kurzer, prägnanter Titel für Option 2", "description": "Beschreibung der zweiten Handlungsoption.", "value": "option_b" },
+            { "title": "Kurzer, prägnanter Titel für Option 3", "description": "Beschreibung der dritten Handlungsoption.", "value": "option_c" }
+          ]
+        }
+        \`\`\`
+    `;
 
-    **Schritt 2: Finanzielle Situation**
-    - Monatliches Einkommen: ${data.step2.income} €
-    - Monatliche Ausgaben: ${data.step2.expenses} €
-    - Liquides Vermögen: ${data.step2.assets} €
-    - Verbindlichkeiten: ${data.step2.liabilities} €
-    ${data.step2.pensionGap ? `- Geschätzte monatliche Rentenlücke: ${data.step2.pensionGap} €` : ""}
-    ${data.step2.equityForRealEstate ? `- Verfügbares Eigenkapital für Immobilien: ${data.step2.equityForRealEstate} €` : ""}
-
-    **Schritt 3: Money Mindset**
-    - Gefühl zu Geld: ${data.step3.moneyFeelings.join(", ")}
-    - Wichtigkeit (0 = Heutiger Lebensstil, 100 = Langfristige Sicherheit): ${data.step3.lifestyleVsSecurity}
-    ${data.step3.retirementConfidence !== undefined ? `- Zuversicht für Altersvorsorge (0 = Unsicher, 100 = Zuversichtlich): ${data.step3.retirementConfidence}` : ""}
-
-    **Schritt 4: Finanz-Charakter & Risiko**
-    - Gestelltes Szenario: "${data.step4.scenarioQuestion}"
-    - Reaktion des Kunden: ${data.step4.riskReaction}
-    ${data.step4.financialWorries ? `- Größte finanzielle Sorgen: "${data.step4.financialWorries}"` : ""}
-
-    Basierend auf diesen Informationen, erstelle bitte die Analyse.
-    `
-}
-
-export async function getFinancialAnalysis(data: FormData): Promise<GeminiAnalysis> {
-	const apiKey = process.env.GEMINI_API_KEY
-
-	if (!apiKey) {
-		console.warn("GEMINI_API_KEY not found, returning mock data.")
-		// Mock response for development without API key
-		return {
-			analyse:
-				"Basierend auf Ihren Angaben haben Sie eine solide finanzielle Grundlage. Ihre Sparquote ist gut und Sie denken bereits an wichtige Ziele wie die Altersvorsorge. Ein Fokus auf den weiteren Vermögensaufbau könnte Ihr nächster Schritt sein.",
-			scoreText: "Gut",
-			chartData: {
-				risiko: 75,
-				sparen: 80,
-				planung: 85,
-				liquiditaet: 60,
-				vermoegen: 70,
-				lifestyle: 50,
-			},
-		}
-	}
-
-	const ai = new GoogleGenAI({ apiKey })
-
-	try {
-		const response = await ai.models.generateContent({
-			model: "gemini-2.5-flash",
-			contents: formatPrompt(data),
-			config: {
-				responseMimeType: "application/json",
-				responseSchema: resultSchema,
-			},
-		})
-
-		if (!response) {
-			throw new Error("Failed to make API call")
-		}
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash", 
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+            }
+        });
 
 		if (!response.text) {
-			throw new Error("No response by Gemini received")
+			throw new Error("no res text")
 		}
+        const jsonText = response.text.trim();
+        const result = JSON.parse(jsonText);
+        return result as GeneratedScenario;
+    } catch (error) {
+        console.error("Error calling Gemini API for scenario generation:", error);
+        // Fallback scenario
+        return {
+            scenario: "Ihr Anlageportfolio hat unerwartet 20% an Wert verloren. Wie reagieren Sie?",
+            options: [
+                { title: "Verkaufen", description: "Sie verkaufen einen Teil, um weitere Verluste zu begrenzen.", value: "option_a" },
+                { title: "Abwarten", description: "Sie halten an Ihrer Strategie fest und warten, bis sich der Markt erholt.", value: "option_b" },
+                { title: "Nachkaufen", description: "Sie sehen es als Chance und investieren zusätzliches Kapital.", value: "option_c" }
+            ]
+        };
+    }
+}
 
-		const jsonString = response.text.trim()
-		const result = JSON.parse(jsonString)
-		return result as GeminiAnalysis
-	} catch (error) {
-		console.error("Error calling Gemini API:", error)
-		throw new Error("Failed to get financial analysis.")
+
+export async function getFinancialAnalysis(data: FormData): Promise<GeminiAnalysis> {
+  const selectedScenarioOption = data.step4.options.find(opt => opt.value === data.step4.answer);
+  
+  const prompt = `
+    Führe eine Finanzanalyse für einen Kunden durch, basierend auf den folgenden Daten.
+    Gib deine Antwort NUR als JSON-Objekt zurück, das dem bereitgestellten Schema entspricht.
+    Sprache der Analyse: Deutsch.
+
+    **Kundendaten:**
+
+    **Schritt 1: Lebenssituation & Ziele**
+    - Lebensphase: ${data.step1.lifePhase}
+    - Hauptziele: ${Object.entries(data.step1.goals).filter(([,v]) => v).map(([k]) => k).join(", ")}
+    - Zieldetails (Priorität/Horizont): Altersvorsorge (${data.step1.goalDetails.retirement.priority}/${data.step1.goalDetails.retirement.horizon}), Immobilie (${data.step1.goalDetails.realEstate.priority}/${data.step1.goalDetails.realEstate.horizon}), Vermögensaufbau (${data.step1.goalDetails.wealth.priority}/${data.step1.goalDetails.wealth.horizon})
+
+    **Schritt 2: Finanzielle Situation (monatlich in EUR)**
+    - Einkommen: ${data.step2.income}
+    - Ausgaben: ${data.step2.expenses}
+    - Liquides Vermögen: ${data.step2.assets}
+    - Verbindlichkeiten: ${data.step2.liabilities}
+
+    **Schritt 3: Money Mindset**
+    - Gefühle zu Geld: ${data.step3.moneyFeelings.join(", ")}
+    - Balance (0=Lebensstil, 100=Sicherheit): ${data.step3.lifestyleVsSecurity}
+    - Finanzwissen (0-100): ${data.step3.financialKnowledge}
+    - Entscheidungsstil: ${data.step3.decisionStyle}
+    - Investment-Erfahrung: ${data.step3.investmentExperience}
+
+    **Schritt 4: Reaktion auf KI-Szenario**
+    - Präsentiertes Szenario: "${data.step4.scenario}"
+    - Gewählte Reaktion: "${selectedScenarioOption?.title}: ${selectedScenarioOption?.description}"
+    
+    **Schritt 5: Risikoprofil (Fragebogen)**
+    - Antworten zum Risikoprofil: ${JSON.stringify(data.step5.riskProfileAnswers, null, 2)}
+    - Finanzielle Sorgen: ${data.step5.financialWorries || "Keine angegeben"}
+
+    **Analyseauftrag:**
+
+    1.  **scoreText**: Gib eine Gesamtbewertung ab. Wähle EINEN der folgenden Werte: "Ausgezeichnet", "Gut", "Solide", "Optimierungsbedarf".
+    2.  **analyse**: Schreibe eine kurze, aber aufschlussreiche Zusammenfassung (2-3 Sätze). Berücksichtige insbesondere die Reaktion im KI-Szenario als wichtigen Indikator für das tatsächliche Verhalten. Gehe auf die Stärken und die größten Potenziale ein. Sei ermutigend und konstruktiv.
+    3.  **chartData**: Erstelle Daten für ein Radar-Diagramm. Bewerte die folgenden 6 Dimensionen auf einer Skala von 0 bis 100, basierend auf den Kundendaten. Die Subjects MÜSSEN exakt lauten: "Liquidität", "Sparrate", "Vermögen", "Risikomanagement", "Zielplanung", "Mindset".
+    4.  **detailedAnalysis**: Erstelle eine detaillierte Analyse für JEDE der 6 Dimensionen aus chartData. Gib für jeden Subject eine kurze, konstruktive Erklärung (1-2 Sätze), die den Score begründet und einen konkreten Tipp gibt.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            scoreText: { type: Type.STRING },
+            analyse: { type: Type.STRING },
+            chartData: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  subject: { type: Type.STRING },
+                  value: { type: Type.INTEGER },
+                },
+                required: ["subject", "value"],
+              },
+            },
+            detailedAnalysis: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  subject: { type: Type.STRING },
+                  explanation: { type: Type.STRING },
+                },
+                required: ["subject", "explanation"],
+              },
+            },
+          },
+          required: ["scoreText", "analyse", "chartData", "detailedAnalysis"],
+        },
+      },
+    });
+
+	if (!response.text) {
+		throw new Error("no res text")
 	}
+
+    const jsonText = response.text.trim();
+    const result = JSON.parse(jsonText);
+    return result as GeminiAnalysis;
+
+  } catch (error) {
+    console.error("Error calling Gemini API:", error);
+    throw new Error("Failed to get financial analysis from Gemini API.");
+  }
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useCallback, useMemo } from "react"
+import React, { useState, useCallback, useMemo, useEffect } from "react"
 import type { FormData, Step1Data, Step2Data, GeminiAnalysis } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,13 +9,12 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Slider } from "@/components/ui/slider"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { LoaderCircle } from "lucide-react"
 import RadarChartComponent from "@/components/RadarChartComponent"
-import { getFinancialAnalysis } from "@/app/actions/analyze"
+import { generateDynamicScenario, getFinancialAnalysis } from "@/app/actions/analyze"
 import {
 	ChartIcon,
 	SparkleIcon,
@@ -40,9 +39,10 @@ const initialFormData: FormData = {
 		},
 	},
 	step2: { income: "", expenses: "", assets: "", liabilities: "", pensionGap: "", equityForRealEstate: "" },
-	step3: { moneyFeelings: [], lifestyleVsSecurity: 50, retirementConfidence: 50 },
-	step4: { riskReaction: "", financialWorries: "", scenarioQuestion: "", scenarioType: "" },
-}
+	step3: { moneyFeelings: [], lifestyleVsSecurity: 50, retirementConfidence: 50, financialKnowledge: 50, decisionStyle: "", investmentExperience: "Keine" },
+	step4: { scenario: "", options: [], answer: "" },
+	step5: { riskProfileAnswers: {}, financialWorries: "" },
+};
 
 interface StepProps {
 	setData: React.Dispatch<React.SetStateAction<FormData>>
@@ -386,71 +386,69 @@ const Step3_Mindset: React.FC<StepProps> = ({ setData, data }) => {
 	return (
 		<Card className="shadow-sm">
 			<CardHeader>
-				<CardTitle>Ihr \"Money Mindset\"</CardTitle>
+				<CardTitle>Ihr "Money Mindset"</CardTitle>
 				<CardDescription>{dynamicIntro}</CardDescription>
 			</CardHeader>
-			<CardContent className="space-y-8">
+			<CardContent className="pt-6 space-y-8">
 				<div className="space-y-3">
 					<Label>Welche Begriffe beschreiben Ihr Gefühl zu Geld am besten?</Label>
-					<ToggleGroup
-						type="multiple"
-						value={step3.moneyFeelings}
-						onValueChange={(value) => setData((prev) => ({ ...prev, step3: { ...prev.step3, moneyFeelings: value } }))}
-						className="flex-wrap justify-start"
+					<div className="flex flex-wrap gap-2">
+						{["Sicherheit", "Stress", "Chance", "Freiheit", "Kompliziert"].map(feeling => (
+							<button key={feeling} onClick={() => setData(prev => ({ ...prev, step3: { ...prev.step3, moneyFeelings: prev.step3.moneyFeelings.includes(feeling) ? prev.step3.moneyFeelings.filter(f => f !== feeling) : [...prev.step3.moneyFeelings, feeling] } }))} className={`px-3 py-1.5 border rounded-full text-sm transition-colors ${step3.moneyFeelings.includes(feeling) ? 'bg-primary text-primary-foreground border-primary' : 'bg-transparent hover:bg-muted'}`}>
+								{feeling}
+							</button>
+						))}
+					</div>
+				</div>
+
+				<div className="space-y-3">
+					<Label>Wie schätzen Sie Ihr Finanzwissen ein?</Label>
+					<input type="range" min={0} max={100} step={1} value={step3.financialKnowledge} onChange={(e) => setData((prev) => ({ ...prev, step3: { ...prev.step3, financialKnowledge: parseInt(e.target.value) } }))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+					<div className="flex justify-between text-xs text-muted-foreground"><span>Anfänger</span><span>Experte</span></div>
+				</div>
+
+				<div className="space-y-3">
+					<Label>Wie treffen Sie typischerweise wichtige finanzielle Entscheidungen?</Label>
+					<div className="flex flex-wrap gap-2">
+						{["Spontan", "Nach Recherche", "Mit Beratung", "Ich vermeide sie"].map(style => (
+							<button key={style} onClick={() => setData(prev => ({ ...prev, step3: { ...prev.step3, decisionStyle: style } }))} className={`px-3 py-1.5 border rounded-full text-sm transition-colors ${step3.decisionStyle === style ? 'bg-primary text-primary-foreground border-primary' : 'bg-transparent hover:bg-muted'}`}>
+								{style}
+							</button>
+						))}
+					</div>
+				</div>
+
+				<div className="space-y-2">
+					<Label>Ihre bisherige Erfahrung mit Geldanlagen (Aktien, Fonds, etc.)?</Label>
+					<select
+						value={step3.investmentExperience}
+						onChange={(e) => setData(prev => ({ ...prev, step3: { ...prev.step3, investmentExperience: e.target.value } }))}
+						className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 					>
-						<ToggleGroupItem value="Sicherheit">Sicherheit</ToggleGroupItem>
-						<ToggleGroupItem value="Stress">Stress</ToggleGroupItem>
-						<ToggleGroupItem value="Chance">Chance</ToggleGroupItem>
-						<ToggleGroupItem value="Freiheit">Freiheit</ToggleGroupItem>
-						<ToggleGroupItem value="Kompliziert">Kompliziert</ToggleGroupItem>
-					</ToggleGroup>
+						<option value="Keine">Keine</option>
+						<option value="Anfänger">Anfänger (z.B. ETF-Sparplan)</option>
+						<option value="Fortgeschritten">Fortgeschritten (z.B. Einzelaktien)</option>
+						<option value="Experte">Experte (z.B. komplexe Produkte)</option>
+					</select>
 				</div>
 
 				{showRetirementConfidence && (
 					<div className="space-y-3 animate-fade-in">
 						<Label>Wie zuversichtlich fühlen Sie sich bezüglich Ihrer Altersvorsorge?</Label>
-						<Slider
-							min={0}
-							max={100}
-							step={1}
-							value={[step3.retirementConfidence || 50]}
-							onValueChange={(value) =>
-								setData((prev) => ({
-									...prev,
-									step3: { ...prev.step3, retirementConfidence: value[0] },
-								}))
-							}
-						/>
-						<div className="flex justify-between text-xs text-muted-foreground">
-							<span>Eher unsicher</span>
-							<span>Sehr zuversichtlich</span>
-						</div>
+						<input type="range" min={0} max={100} step={1} value={step3.retirementConfidence || 50} onChange={(e) => setData(prev => ({ ...prev, step3: { ...prev.step3, retirementConfidence: parseInt(e.target.value) } }))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+						<div className="flex justify-between text-xs text-muted-foreground"><span>Eher unsicher</span><span>Sehr zuversichtlich</span></div>
 					</div>
 				)}
 
 				<div className="space-y-3">
 					<Label>Was ist Ihnen wichtiger?</Label>
-					<Slider
-						min={0}
-						max={100}
-						step={1}
-						value={[step3.lifestyleVsSecurity]}
-						onValueChange={(value) =>
-							setData((prev) => ({
-								...prev,
-								step3: { ...prev.step3, lifestyleVsSecurity: value[0] },
-							}))
-						}
-					/>
-					<div className="flex justify-between text-xs text-muted-foreground">
-						<span>Heutigen Lebensstil genießen</span>
-						<span>Langfristige Sicherheit</span>
-					</div>
+					<input type="range" min={0} max={100} step={1} value={step3.lifestyleVsSecurity} onChange={(e) => setData(prev => ({ ...prev, step3: { ...prev.step3, lifestyleVsSecurity: parseInt(e.target.value) } }))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+					<div className="flex justify-between text-xs text-muted-foreground"><span>Heutigen Lebensstil genießen</span><span>Langfristige Sicherheit</span></div>
 				</div>
 			</CardContent>
 		</Card>
-	)
-}
+	);
+};
 
 const determineScenario = (data: FormData) => {
 	const { step1, step2, step3 } = data
@@ -536,191 +534,250 @@ const determineScenario = (data: FormData) => {
 	}
 }
 
-const Step4_RiskProfile: React.FC<StepProps> = ({ setData, data }) => {
-	const { step3, step4 } = data
-	const { riskReaction, financialWorries } = step4
+const Step4_ScenarioSimulation: React.FC<StepProps> = ({ setData, data }) => {
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const { step4 } = data;
 
-	const scenario = useMemo(() => determineScenario(data), [data])
+	const fetchScenario = useCallback(async () => {
+		// Only fetch if scenario is not already loaded
+		if (data.step4.scenario) {
+			setIsLoading(false);
+			return;
+		}
+		setIsLoading(true);
+		setError(null);
+		try {
+			const result = await generateDynamicScenario(data);
+			setData(prev => ({
+				...prev,
+				step4: { ...prev.step4, scenario: result.scenario, options: result.options }
+			}));
+		} catch (e) {
+			setError("Fehler bei der Szenario-Erstellung. Bitte laden Sie die Seite neu.");
+		} finally {
+			setIsLoading(false);
+		}
+	}, [data, setData]);
 
-	React.useEffect(() => {
-		setData((prev) => {
-			if (prev.step4.scenarioQuestion !== scenario.question) {
-				return {
-					...prev,
-					step4: {
-						...prev.step4,
-						riskReaction: "",
-						scenarioQuestion: scenario.question,
-						scenarioType: scenario.type,
-					},
-				}
-			}
-			return prev
-		})
-	}, [scenario, setData])
+	useEffect(() => {
+		fetchScenario();
+	}, [fetchScenario]);
 
-	const handleReaction = (value: string) => {
-		setData((prev) => ({ ...prev, step4: { ...prev.step4, riskReaction: value } }))
+	const handleAnswer = (value: string) => {
+		setData(prev => ({ ...prev, step4: { ...prev.step4, answer: value } }));
+	};
+
+	if (isLoading) {
+		return (
+			<Card className="shadow-sm text-center p-8">
+				<LoaderCircle className="animate-spin rounded-full h-12 w-12 mx-auto mb-4" />
+				<p>Ihr persönliches Szenario wird generiert...</p>
+				<p className="text-sm text-muted-foreground">Die KI analysiert Ihre Eingaben, um eine relevante Entscheidungssituation für Sie zu erstellen.</p>
+			</Card>
+		);
 	}
 
-	const showWorriesQuestion = step3.moneyFeelings.includes("Stress") || step3.moneyFeelings.includes("Kompliziert")
+	if (error) return <div className="text-center p-8 text-destructive">{error}</div>;
+
+	return (
+		<Card className="shadow-sm">
+			<CardHeader>
+				<CardTitle>Szenario: Ihre Entscheidung</CardTitle>
+				<CardDescription>{step4.scenario}</CardDescription>
+			</CardHeader>
+			<CardContent className="pt-6 space-y-4">
+				{step4.options.map(opt => (
+					<div
+						key={opt.value}
+						onClick={() => handleAnswer(opt.value)}
+						className={`p-4 border rounded-lg cursor-pointer transition-all ${step4.answer === opt.value ? "border-primary bg-primary/5 ring-2 ring-primary" : "hover:bg-muted/50 hover:border-muted-foreground/20"}`}
+					>
+						<h4 className="font-semibold">{opt.title}</h4>
+						<p className="text-sm text-muted-foreground">{opt.description}</p>
+					</div>
+				))}
+			</CardContent>
+		</Card>
+	);
+};
+const Step5_RiskProfile: React.FC<StepProps> = ({ setData, data }) => {
+	const { step3, step5 } = data;
+	const { riskProfileAnswers, financialWorries } = step5;
+
+	const riskQuestions = useMemo(() => generateRiskQuestions(data), [data]);
+
+	const handleAnswer = (questionId: string, value: string) => {
+		setData((prev) => ({
+			...prev,
+			step5: {
+				...prev.step5,
+				riskProfileAnswers: {
+					...prev.step5.riskProfileAnswers,
+					[questionId]: value,
+				},
+			},
+		}));
+	};
+
+	const showWorriesQuestion = step3.moneyFeelings.includes("Stress") || step3.moneyFeelings.includes("Kompliziert");
 
 	return (
 		<Card className="shadow-sm">
 			<CardHeader>
 				<CardTitle>Finanz-Charakter & Risiko</CardTitle>
-				<CardDescription>{scenario.question}</CardDescription>
+				<CardDescription>Ihre Antworten helfen uns, Ihr Risikoprofil besser zu verstehen.</CardDescription>
 			</CardHeader>
-			<CardContent className="space-y-4">
-				{scenario.options.map((opt) => (
-					<div
-						key={opt.value}
-						onClick={() => handleReaction(opt.value)}
-						className={`p-4 border rounded-lg cursor-pointer transition-all ${riskReaction === opt.value ? "border-primary bg-primary/5 ring-2 ring-primary" : "hover:bg-muted/50 hover:border-muted-foreground/20"}`}
-					>
-						<h4 className="font-semibold">{opt.title}</h4>
-						<p className="text-sm text-muted-foreground">{opt.description}</p>
+			<CardContent className="pt-6 space-y-8">
+				{riskQuestions.map((q, index) => (
+					<div key={q.id} className="space-y-4 border-b pb-8 last:border-b-0 last:pb-0">
+						<Label className="font-semibold text-base">{index + 1}. {q.question}</Label>
+						<div className="space-y-3">
+							{q.options.map(opt => (
+								<div
+									key={opt.value}
+									onClick={() => handleAnswer(q.id, opt.value)}
+									className={`p-4 border rounded-lg cursor-pointer transition-all ${riskProfileAnswers[q.id] === opt.value ? "border-primary bg-primary/5 ring-2 ring-primary" : "hover:bg-muted/50 hover:border-muted-foreground/20"}`}
+								>
+									<h4 className="font-semibold">{opt.title}</h4>
+									<p className="text-sm text-muted-foreground">{opt.description}</p>
+								</div>
+							))}
+						</div>
 					</div>
 				))}
 
 				{showWorriesQuestion && (
 					<div className="p-4 border rounded-lg space-y-4 bg-muted/50 animate-fade-in mt-6">
 						<div className="space-y-2">
-							<Label htmlFor="financialWorries" className="font-semibold">
-								Ihre größten Sorgen
-							</Label>
-							<p className="text-sm text-muted-foreground">
-								Sie haben \"Stress\" oder \"Kompliziert\" als Gefühl zu Geld angegeben. Was genau bereitet Ihnen Sorgen?
-							</p>
-							<Textarea
-								id="financialWorries"
-								value={financialWorries}
-								onChange={(e) =>
-									setData((prev) => ({ ...prev, step4: { ...prev.step4, financialWorries: e.target.value } }))
-								}
-								placeholder="z.B. Angst vor Inflation, Unwissen über Anlagemöglichkeiten, Komplexität von Finanzprodukten..."
-							/>
+							<Label htmlFor="financialWorries" className="font-semibold">Ihre größten Sorgen</Label>
+							<p className="text-sm text-muted-foreground">Sie haben "Stress" oder "Kompliziert" als Gefühl zu Geld angegeben. Was genau bereitet Ihnen Sorgen?</p>
+							<Textarea id="financialWorries" value={financialWorries} onChange={(e) => setData((prev) => ({ ...prev, step5: { ...prev.step5, financialWorries: e.target.value } }))} placeholder="z.B. Angst vor Inflation, Unwissen über Anlagemöglichkeiten, Komplexität von Finanzprodukten..." />
 						</div>
 					</div>
 				)}
 			</CardContent>
 		</Card>
-	)
-}
+	);
+};
+const generateRiskQuestions = (data: FormData) => {
+	const questions = [];
+	const { step3 } = data;
 
-const Step5_Results: React.FC<{ data: FormData }> = ({ data }) => {
-	const [analysis, setAnalysis] = useState<GeminiAnalysis | null>(null)
-	const [isLoading, setIsLoading] = useState(true)
-	const [error, setError] = useState<string | null>(null)
-	const [isModalOpen, setIsModalOpen] = useState(false)
-	const [consultationCode] = useState(generateConsultationCode())
-	const [isCopied, setIsCopied] = useState(false)
+	questions.push({
+		id: "loss_aversion",
+		question: "Was wiegt für Sie emotional schwerer?",
+		options: [
+			{ value: "Verlust", title: "Der Schmerz über 1.000 € Verlust", description: "Einen Verlust zu realisieren, fühlt sich besonders schlecht an." },
+			{ value: "Gewinn", title: "Die Freude über 1.000 € Gewinn", description: "Ein Gewinn motiviert mich und fühlt sich großartig an." },
+			{ value: "Gleich", title: "Beides wiegt etwa gleich", description: "Ich betrachte Gewinne und Verluste rational und unemotional." },
+		],
+	});
+
+	if (step3.investmentExperience !== 'Keine') {
+		questions.push({
+			id: 'regret_aversion',
+			question: 'Was würden Sie im Nachhinein mehr bereuen?',
+			options: [
+				{ value: 'Chance verpasst', title: 'Eine große Chance verpasst zu haben', description: 'Ich würde mich ärgern, nicht investiert zu haben, wenn die Anlage stark steigt.' },
+				{ value: 'Geld verloren', title: 'In eine Anlage investiert zu haben, die an Wert verliert', description: 'Ich würde mich ärgern, Geld verloren zu haben, auch wenn das Risiko bekannt war.' },
+			]
+		});
+	}
+
+	return questions;
+};
+
+
+const Step6_Results: React.FC<{ data: FormData }> = ({ data }) => {
+	const [analysis, setAnalysis] = useState<GeminiAnalysis | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [consultationCode] = useState(generateConsultationCode());
+	const [isCopied, setIsCopied] = useState(false);
 
 	const fetchAnalysis = useCallback(async () => {
-		setIsLoading(true)
-		setError(null)
+		setIsLoading(true);
+		setError(null);
 		try {
-			const result = await getFinancialAnalysis(data)
-			setAnalysis(result)
+			const result = await getFinancialAnalysis(data);
+			setAnalysis(result);
 		} catch (e) {
-			setError("Fehler bei der Analyse. Bitte versuchen Sie es später erneut.")
+			setError("Fehler bei der Analyse. Bitte versuchen Sie es später erneut.");
 		} finally {
-			setIsLoading(false)
+			setIsLoading(false);
 		}
-	}, [data])
+	}, [data]);
 
-	React.useEffect(() => {
-		fetchAnalysis()
-	}, [fetchAnalysis])
+	useEffect(() => {
+		fetchAnalysis();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	const handleCopy = () => {
 		navigator.clipboard.writeText(consultationCode).then(() => {
-			setIsCopied(true)
-			setTimeout(() => setIsCopied(false), 2000)
-		})
-	}
+			setIsCopied(true);
+			setTimeout(() => setIsCopied(false), 2000);
+		});
+	};
 
-	if (isLoading) {
-		return (
-			<div className="text-center p-8">
-				<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-				<p>Ihre persönliche Analyse wird erstellt...</p>
-			</div>
-		)
-	}
+	if (isLoading) return (<div className="text-center p-8"><LoaderCircle className="animate-spin rounded-full h-12 w-12 mx-auto mb-4" /><p>Ihre persönliche Analyse wird erstellt...</p></div>);
+	if (error || !analysis) return <div className="text-center p-8 text-destructive">{error || "Analyse konnte nicht geladen werden."}</div>;
 
-	if (error || !analysis) {
-		return <div className="text-center p-8 text-destructive">{error || "Analyse konnte nicht geladen werden."}</div>
-	}
-
-	const scoreColors: Record<string, string> = {
-		Ausgezeichnet: "text-green-600 bg-green-100",
-		Gut: "text-green-600 bg-green-100",
-		Solide: "text-yellow-600 bg-yellow-100",
-		Optimierungsbedarf: "text-orange-600 bg-orange-100",
-	}
+	const scoreColors: Record<string, string> = { Ausgezeichnet: "text-green-600 bg-green-100", Gut: "text-green-600 bg-green-100", Solide: "text-yellow-600 bg-yellow-100", Optimierungsbedarf: "text-orange-600 bg-orange-100" };
 
 	return (
 		<div className="space-y-6">
 			<Card className="shadow-sm">
 				<CardHeader>
 					<CardTitle>Ihr Finanz-Ergebnis</CardTitle>
-					<div
-						className={`inline-block px-3 py-1 text-sm font-semibold rounded-full w-fit ${scoreColors[analysis.scoreText] || "bg-gray-100"}`}
-					>
-						{analysis.scoreText}
-					</div>
+					<div className={`inline-block px-3 py-1 text-sm font-semibold rounded-full w-fit ${scoreColors[analysis.scoreText] || "bg-gray-100"}`}>{analysis.scoreText}</div>
 				</CardHeader>
-				<CardContent>
-					<p>{analysis.analyse}</p>
-				</CardContent>
+				<CardContent className="pt-6"><p>{analysis.analyse}</p></CardContent>
 			</Card>
 			<Card className="shadow-sm">
-				<CardHeader>
-					<CardTitle>Profil-Übersicht</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<RadarChartComponent data={analysis.chartData} />
-				</CardContent>
+				<CardHeader><CardTitle>Profil-Übersicht</CardTitle></CardHeader>
+				<CardContent className="pt-0"><RadarChartComponent data={analysis.chartData} /></CardContent>
 			</Card>
+            <Card className="shadow-sm">
+                <CardHeader><CardTitle>Ihre Detail-Analyse</CardTitle><CardDescription>Hier sehen Sie eine Aufschlüsselung Ihrer Ergebnisse in den Kernbereichen.</CardDescription></CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                    {analysis.detailedAnalysis.map((detail, index) => {
+                        const chartItem = analysis.chartData.find(item => item.subject === detail.subject);
+                        const score = chartItem ? chartItem.value : 0;
+                        const scoreColor = score >= 75 ? 'text-green-600' : score >= 50 ? 'text-yellow-600' : 'text-orange-600';
+
+                        return (
+                            <div key={index} className="p-4 rounded-lg bg-muted/50">
+                                <div className="flex justify-between items-center mb-1">
+                                    <h4 className="font-semibold">{detail.subject}</h4>
+                                    <span className={`font-bold text-lg ${scoreColor}`}>{score} / 100</span>
+                                </div>
+                                <p className="text-sm text-muted-foreground">{detail.explanation}</p>
+                            </div>
+                        )
+                    })}
+                </CardContent>
+            </Card>
 			<Card className="bg-muted/50 border-primary shadow-sm">
 				<CardContent className="pt-6 text-center">
 					<h3 className="text-xl font-semibold mb-2">Der nächste Schritt? Ein persönliches Gespräch.</h3>
-					<p className="text-muted-foreground mb-4">
-						Ihr Code schaltet eine persönliche Besprechung Ihrer Ergebnisse frei. Ein Bank Gutmann Experte kann Ihnen
-						helfen, die nächsten Schritte zu planen.
-					</p>
-
+					<p className="text-muted-foreground mb-4">Ihr Code schaltet eine persönliche Besprechung Ihrer Ergebnisse frei. Ein Bank Gutmann Experte kann Ihnen helfen, die nächsten Schritte zu planen.</p>
 					<div className="my-6">
 						<Label className="text-sm text-muted-foreground">Ihr persönlicher Beratungscode</Label>
 						<div className="flex items-center justify-center gap-2 mt-1">
 							<span className="text-2xl font-mono p-2 bg-background border rounded-md">{consultationCode}</span>
-							<Button variant="ghost" size="icon" onClick={handleCopy}>
-								{isCopied ? "Kopiert!" : <CopyIcon />}
-							</Button>
+							<Button variant="ghost" size="icon" onClick={handleCopy}>{isCopied ? "Kopiert!" : <CopyIcon />}</Button>
 						</div>
 					</div>
-
-					<Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto" size="lg">
-						<CalendarIcon className="mr-2" />
-						Jetzt Experten-Gespräch anfordern
-					</Button>
+					<Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto" size="lg"><CalendarIcon className="mr-2" />Jetzt Experten-Gespräch anfordern</Button>
 				</CardContent>
 			</Card>
-			<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>Beratungstermin vereinbaren</DialogTitle>
-					</DialogHeader>
-					<div className="text-center">
-						<p className="mb-4">Vielen Dank für Ihr Interesse! Dieses Feature ist im Prototyp nicht implementiert.</p>
-						<Button onClick={() => setIsModalOpen(false)}>Schließen</Button>
-					</div>
-				</DialogContent>
-			</Dialog>
+			{isModalOpen && <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center" onClick={() => setIsModalOpen(false)}><div className="bg-background p-6 rounded-lg shadow-lg w-full max-w-sm" onClick={(e) => e.stopPropagation()}><h3 className="text-lg font-semibold mb-2">Beratungstermin vereinbaren</h3><div className="text-center"><p className="mb-4">Vielen Dank für Ihr Interesse! Dieses Feature ist im Prototyp nicht implementiert.</p><Button onClick={() => setIsModalOpen(false)}>Schließen</Button></div></div></div>}
 		</div>
-	)
-}
+	);
+};
 
 export default function App() {
 	const [currentStep, setCurrentStep] = useState(0)
@@ -733,22 +790,16 @@ export default function App() {
 
 	const renderStep = () => {
 		switch (currentStep) {
-			case 0:
-				return <Step0_Start onNext={nextStep} />
-			case 1:
-				return <Step1_LifeGoals setData={setFormData} data={formData} />
-			case 2:
-				return <Step2_Financials setData={setFormData} data={formData} />
-			case 3:
-				return <Step3_Mindset setData={setFormData} data={formData} />
-			case 4:
-				return <Step4_RiskProfile setData={setFormData} data={formData} />
-			case 5:
-				return <Step5_Results data={formData} />
-			default:
-				return <Step0_Start onNext={nextStep} />
+			case 0: return <Step0_Start onNext={nextStep} />;
+			case 1: return <Step1_LifeGoals setData={setFormData} data={formData} />;
+			case 2: return <Step2_Financials setData={setFormData} data={formData} />;
+			case 3: return <Step3_Mindset setData={setFormData} data={formData} />;
+			case 4: return <Step4_ScenarioSimulation setData={setFormData} data={formData} />;
+			case 5: return <Step5_RiskProfile setData={setFormData} data={formData} />;
+			case 6: return <Step6_Results data={formData} />;
+			default: return <Step0_Start onNext={nextStep} />;
 		}
-	}
+	};
 
 	return (
 		<div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
