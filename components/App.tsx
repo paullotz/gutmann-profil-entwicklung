@@ -699,6 +699,7 @@ const Step6_Results: React.FC<{ data: FormData }> = ({ data }) => {
 	const [consentToSave, setConsentToSave] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
 	const [saveSuccess, setSaveSuccess] = useState(false);
+	const [isDownloadingPDF, setIsDownloadingPDF] = useState(false);
 
 	const fetchAnalysis = useCallback(async () => {
 		setIsLoading(true);
@@ -717,12 +718,49 @@ const Step6_Results: React.FC<{ data: FormData }> = ({ data }) => {
 		fetchAnalysis();
 	}, [fetchAnalysis]);
 
+	const handleDownloadPDF = async () => {
+		setIsDownloadingPDF(true);
+
+		try {
+			const response = await fetch('/api/pdf', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					formData: data,
+					analysis: analysis,
+					consultationCode: consultationCode,
+				}),
+			});
+
+			if (response.ok) {
+				const blob = await response.blob();
+				const url = window.URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = `Financial-Check-${consultationCode}.pdf`;
+				document.body.appendChild(a);
+				a.click();
+				window.URL.revokeObjectURL(url);
+				document.body.removeChild(a);
+			} else {
+				setError('Fehler beim Erstellen des PDFs');
+			}
+		} catch (error) {
+			console.error('PDF download error:', error);
+			setError('Fehler beim Herunterladen des PDFs');
+		} finally {
+			setIsDownloadingPDF(false);
+		}
+	};
+
 	const handleSaveData = async () => {
 		if (!consentToSave) return;
-		
+
 		setIsSaving(true);
 		setSaveSuccess(false);
-		
+
 		try {
 			const response = await fetch('/api/data', {
 				method: 'POST',
@@ -765,22 +803,123 @@ const Step6_Results: React.FC<{ data: FormData }> = ({ data }) => {
 			<p>Ihre persönliche Analyse wird erstellt...</p>
 		</div>
 	);
-	
+
 	if (error || !analysis) return (
 		<div className="text-center p-8 text-destructive">
 			{error || "Analyse konnte nicht geladen werden."}
 		</div>
 	);
 
-	const scoreColors: Record<string, string> = { 
-		Ausgezeichnet: "text-green-600 bg-green-100", 
-		Gut: "text-green-600 bg-green-100", 
-		Solide: "text-yellow-600 bg-yellow-100", 
-		Optimierungsbedarf: "text-orange-600 bg-orange-100" 
+	const scoreColors: Record<string, string> = {
+		Ausgezeichnet: "text-green-600 bg-green-100",
+		Gut: "text-green-600 bg-green-100",
+		Solide: "text-yellow-600 bg-yellow-100",
+		Optimierungsbedarf: "text-orange-600 bg-orange-100"
 	};
 
 	return (
 		<div className="space-y-6">
+			<Card className="bg-muted/50 border-primary shadow-sm">
+				<CardContent className="pt-6">
+					{!saveSuccess ? (
+						<div className="space-y-4">
+							<div className="text-center">
+								<h3 className="text-xl font-semibold mb-2">Möchten Sie Ihre Ergebnisse speichern?</h3>
+								<p className="text-muted-foreground mb-4">
+									Speichern Sie Ihre Analyse, um einen persönlichen Beratungscode zu erhalten.
+									Mit diesem Code können Sie später auf Ihre Ergebnisse zugreifen und ein Expertengespräch anfordern.
+								</p>
+							</div>
+
+							<div className="flex items-start space-x-2 p-4 border rounded-lg bg-background">
+								<Checkbox
+									id="consent"
+									checked={consentToSave}
+									onCheckedChange={(checked) => setConsentToSave(checked as boolean)}
+								/>
+								<div className="grid gap-1.5 leading-none">
+									<Label
+										htmlFor="consent"
+										className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+									>
+										Ich stimme der Speicherung meiner Daten zu
+									</Label>
+									<p className="text-sm text-muted-foreground">
+										Ihre Daten werden verschlüsselt gespeichert und nur für die Beratung verwendet.
+										Sie können jederzeit die Löschung beantragen.
+									</p>
+								</div>
+							</div>
+
+							<Button
+								onClick={handleSaveData}
+								disabled={!consentToSave || isSaving}
+								className="w-full"
+								size="lg"
+							>
+								{isSaving ? (
+									<>
+										<LoaderCircle className="animate-spin mr-2 h-4 w-4" />
+										Wird gespeichert...
+									</>
+								) : (
+									"Daten speichern & Code erhalten"
+								)}
+							</Button>
+							<Button
+								onClick={handleDownloadPDF}
+								disabled={isDownloadingPDF}
+								variant="outline"
+								className="w-full sm:w-auto"
+							>
+								{isDownloadingPDF ? (
+									<>
+										<LoaderCircle className="animate-spin mr-2 h-4 w-4" />
+										PDF wird erstellt...
+									</>
+								) : (
+									<>
+										<svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+										</svg>
+										Analyse als PDF herunterladen
+									</>
+								)}
+							</Button>
+						</div>
+					) : (
+						<div className="text-center space-y-4">
+							<div className="inline-block p-3 bg-green-100 rounded-full mb-2">
+								<svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+								</svg>
+							</div>
+							<h3 className="text-xl font-semibold">Erfolgreich gespeichert!</h3>
+							<p className="text-muted-foreground">
+								Ihre Analyse wurde gespeichert. Hier ist Ihr persönlicher Beratungscode:
+							</p>
+							<div className="my-6">
+								<Label className="text-sm text-muted-foreground">Ihr persönlicher Beratungscode</Label>
+								<div className="flex items-center justify-center gap-2 mt-2">
+									<span className="text-2xl font-mono p-3 bg-background border-2 border-primary rounded-md">
+										{consultationCode}
+									</span>
+									<Button variant="ghost" size="icon" onClick={handleCopy}>
+										{isCopied ? "✓" : <CopyIcon />}
+									</Button>
+								</div>
+								<p className="text-xs text-muted-foreground mt-2">
+									Bewahren Sie diesen Code auf, um später auf Ihre Ergebnisse zuzugreifen
+								</p>
+							</div>
+							<Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto" size="lg">
+								<CalendarIcon className="mr-2" />
+								Jetzt Experten-Gespräch anfordern
+							</Button>
+						</div>
+					)}
+				</CardContent>
+			</Card>
 			<Card className="shadow-sm">
 				<CardHeader>
 					<CardTitle>Ihr Finanz-Ergebnis</CardTitle>
@@ -826,87 +965,6 @@ const Step6_Results: React.FC<{ data: FormData }> = ({ data }) => {
 				</CardContent>
 			</Card>
 
-			<Card className="bg-muted/50 border-primary shadow-sm">
-				<CardContent className="pt-6">
-					{!saveSuccess ? (
-						<div className="space-y-4">
-							<div className="text-center">
-								<h3 className="text-xl font-semibold mb-2">Möchten Sie Ihre Ergebnisse speichern?</h3>
-								<p className="text-muted-foreground mb-4">
-									Speichern Sie Ihre Analyse, um einen persönlichen Beratungscode zu erhalten. 
-									Mit diesem Code können Sie später auf Ihre Ergebnisse zugreifen und ein Expertengespräch anfordern.
-								</p>
-							</div>
-
-							<div className="flex items-start space-x-2 p-4 border rounded-lg bg-background">
-								<Checkbox 
-									id="consent" 
-									checked={consentToSave}
-									onCheckedChange={(checked) => setConsentToSave(checked as boolean)}
-								/>
-								<div className="grid gap-1.5 leading-none">
-									<Label
-										htmlFor="consent"
-										className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-									>
-										Ich stimme der Speicherung meiner Daten zu
-									</Label>
-									<p className="text-sm text-muted-foreground">
-										Ihre Daten werden verschlüsselt gespeichert und nur für die Beratung verwendet. 
-										Sie können jederzeit die Löschung beantragen.
-									</p>
-								</div>
-							</div>
-
-							<Button 
-								onClick={handleSaveData}
-								disabled={!consentToSave || isSaving}
-								className="w-full"
-								size="lg"
-							>
-								{isSaving ? (
-									<>
-										<LoaderCircle className="animate-spin mr-2 h-4 w-4" />
-										Wird gespeichert...
-									</>
-								) : (
-									"Daten speichern & Code erhalten"
-								)}
-							</Button>
-						</div>
-					) : (
-						<div className="text-center space-y-4">
-							<div className="inline-block p-3 bg-green-100 rounded-full mb-2">
-								<svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-								</svg>
-							</div>
-							<h3 className="text-xl font-semibold">Erfolgreich gespeichert!</h3>
-							<p className="text-muted-foreground">
-								Ihre Analyse wurde gespeichert. Hier ist Ihr persönlicher Beratungscode:
-							</p>
-							<div className="my-6">
-								<Label className="text-sm text-muted-foreground">Ihr persönlicher Beratungscode</Label>
-								<div className="flex items-center justify-center gap-2 mt-2">
-									<span className="text-2xl font-mono p-3 bg-background border-2 border-primary rounded-md">
-										{consultationCode}
-									</span>
-									<Button variant="ghost" size="icon" onClick={handleCopy}>
-										{isCopied ? "✓" : <CopyIcon />}
-									</Button>
-								</div>
-								<p className="text-xs text-muted-foreground mt-2">
-									Bewahren Sie diesen Code auf, um später auf Ihre Ergebnisse zuzugreifen
-								</p>
-							</div>
-							<Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto" size="lg">
-								<CalendarIcon className="mr-2" />
-								Jetzt Experten-Gespräch anfordern
-							</Button>
-						</div>
-					)}
-				</CardContent>
-			</Card>
 
 			{isModalOpen && (
 				<div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center" onClick={() => setIsModalOpen(false)}>
