@@ -1,26 +1,26 @@
 "use server"
 
 import { GoogleGenAI, Type } from "@google/genai";
-import type { FormData, GeminiAnalysis, GeneratedScenario } from '../../lib/types';
+import type { FormData, GeminiAnalysis, GeneratedScenarios } from '../../lib/types';
 
 const API_KEY = process.env.GEMINI_API_KEY;
 
 if (!API_KEY) {
-  console.warn("API_KEY environment variable not set. Using a placeholder. Please set your API key.");
+	console.warn("API_KEY environment variable not set. Using a placeholder. Please set your API key.");
 }
 const ai = new GoogleGenAI({ apiKey: API_KEY || "YOUR_API_KEY_HERE" });
 
-export async function generateDynamicScenario(data: Pick<FormData, 'step1' | 'step2' | 'step3'>): Promise<GeneratedScenario> {
-    const relevantGoals = Object.entries(data.step1.goals)
-      .filter(([, checked]) => checked)
-      .map(([key]) => key)
-      .join(", ") || "allgemeiner Vermögensaufbau";
+export async function generateDynamicScenarios(data: Pick<FormData, 'step1' | 'step2' | 'step3'>): Promise<GeneratedScenarios> {
+	const relevantGoals = Object.entries(data.step1.goals)
+		.filter(([, checked]) => checked)
+		.map(([key]) => key)
+		.join(", ") || "allgemeiner Vermögensaufbau";
 
-    const prompt = `
-        Basierend auf den folgenden Benutzerdaten, generiere ein einziges, personalisiertes Finanzszenario.
-        Das Szenario soll ein realistisches Dilemma oder eine Entscheidungssituation darstellen, die für den Benutzer relevant ist.
-        Die Sprache muss klar, verständlich und neutral sein.
-
+	const prompt = `
+        Basierend auf den folgenden Benutzerdaten, generiere ZWEI verschiedene, personalisierte Finanzszenarien.
+        
+        **WICHTIG: Jedes Szenario muss KURZ und PRÄGNANT sein (maximal 2 kurze Sätze, ca. 20-30 Wörter).**
+        
         **Benutzerdaten:**
         - Lebensphase: ${data.step1.lifePhase}
         - Hauptziele: ${relevantGoals}
@@ -31,55 +31,103 @@ export async function generateDynamicScenario(data: Pick<FormData, 'step1' | 'st
         - Investment-Erfahrung: ${data.step3.investmentExperience}
 
         **Anforderungen:**
-        1.  **Szenario-Relevanz**: Das Szenario muss direkt auf die Ziele und die finanzielle Situation des Benutzers zugeschnitten sein.
-            (z.B. Immobilien-Szenario bei Immobilien-Ziel, Anlage-Chance bei Vermögensaufbau-Ziel etc.)
-        2.  **Drei Optionen**: Biete genau drei Handlungsoptionen an. Jede Option muss einen unterschiedlichen psychologischen Ansatz repräsentieren (z.B. risikoscheu/sicherheitsorientiert, ausgewogen/analytisch, risikofreudig/opportunistisch).
-        3.  **Antwortformat**: Deine Antwort MUSS ein valides JSON-Objekt sein, das exakt dem folgenden Schema entspricht. Füge keine Erklärungen außerhalb des JSON-Objekts hinzu.
+        1.  **Anzahl**: Generiere GENAU 2 verschiedene Szenarien
+        2.  **Kürze**: Jedes Szenario darf MAXIMAL 2 kurze Sätze haben (20-30 Wörter total)
+        3.  **Verschiedenheit**: Die beiden Szenarien müssen unterschiedliche Aspekte testen (z.B. eines über Verluste, eines über Chancen)
+        4.  **Relevanz**: Beide Szenarien müssen auf die Ziele und Situation des Benutzers zugeschnitten sein
+        5.  **Drei Optionen pro Szenario**: Jedes Szenario hat genau drei kurze Handlungsoptionen
+        6.  **Titel**: Jeder Titel maximal 2-3 Wörter
+        7.  **Beschreibung**: Jede Beschreibung maximal 1 kurzer Satz (10-15 Wörter)
+        
+        **Beispiel für die richtige Struktur:**
+        Szenario 1: "Ihr Portfolio verliert 20% an Wert. Wie reagieren Sie?"
+        - Option 1: Titel: "Sofort verkaufen" / Beschreibung: "Verluste begrenzen und Kapital sichern."
+        - Option 2: Titel: "Abwarten" / Beschreibung: "Position halten und Erholung abwarten."
+        - Option 3: Titel: "Nachkaufen" / Beschreibung: "Günstigen Einstieg nutzen."
+
+        Szenario 2: "Eine risikoreiche Chance verspricht 30% Rendite. Was tun Sie?"
+        - Option 1: Titel: "Ablehnen" / Beschreibung: "Risiko ist zu hoch für mich."
+        - Option 2: Titel: "Klein einsteigen" / Beschreibung: "Nur kleinen Betrag investieren."
+        - Option 3: Titel: "Voll investieren" / Beschreibung: "Chance maximal nutzen."
+
+        **Antwortformat**: 
+        Deine Antwort MUSS ein valides JSON-Objekt sein:
 
         \`\`\`json
         {
-          "scenario": "Eine detaillierte, aber prägnante Beschreibung der Situation...",
-          "options": [
-            { "title": "Kurzer, prägnanter Titel für Option 1", "description": "Beschreibung der ersten Handlungsoption.", "value": "option_a" },
-            { "title": "Kurzer, prägnanter Titel für Option 2", "description": "Beschreibung der zweiten Handlungsoption.", "value": "option_b" },
-            { "title": "Kurzer, prägnanter Titel für Option 3", "description": "Beschreibung der dritten Handlungsoption.", "value": "option_c" }
+          "scenarios": [
+            {
+              "id": "scenario_1",
+              "scenario": "Maximal 2 kurze Sätze...",
+              "options": [
+                { "title": "2-3 Wörter", "description": "Ein kurzer Satz mit max 15 Wörtern.", "value": "option_a" },
+                { "title": "2-3 Wörter", "description": "Ein kurzer Satz mit max 15 Wörtern.", "value": "option_b" },
+                { "title": "2-3 Wörter", "description": "Ein kurzer Satz mit max 15 Wörtern.", "value": "option_c" }
+              ]
+            },
+            {
+              "id": "scenario_2",
+              "scenario": "Maximal 2 kurze Sätze...",
+              "options": [
+                { "title": "2-3 Wörter", "description": "Ein kurzer Satz mit max 15 Wörtern.", "value": "option_a" },
+                { "title": "2-3 Wörter", "description": "Ein kurzer Satz mit max 15 Wörtern.", "value": "option_b" },
+                { "title": "2-3 Wörter", "description": "Ein kurzer Satz mit max 15 Wörtern.", "value": "option_c" }
+              ]
+            }
           ]
         }
         \`\`\`
     `;
 
-    try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash", 
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-            }
-        });
+	try {
+		const response = await ai.models.generateContent({
+			model: "gemini-2.5-flash",
+			contents: prompt,
+			config: {
+				responseMimeType: "application/json",
+			}
+		});
 
 		if (!response.text) {
 			throw new Error("no res text")
 		}
-        const jsonText = response.text.trim();
-        const result = JSON.parse(jsonText);
-        return result as GeneratedScenario;
-    } catch (error) {
-        console.error("Error calling Gemini API for scenario generation:", error);
-        // Fallback scenario
-        return {
-            scenario: "Ihr Anlageportfolio hat unerwartet 20% an Wert verloren. Wie reagieren Sie?",
-            options: [
-                { title: "Verkaufen", description: "Sie verkaufen einen Teil, um weitere Verluste zu begrenzen.", value: "option_a" },
-                { title: "Abwarten", description: "Sie halten an Ihrer Strategie fest und warten, bis sich der Markt erholt.", value: "option_b" },
-                { title: "Nachkaufen", description: "Sie sehen es als Chance und investieren zusätzliches Kapital.", value: "option_c" }
-            ]
-        };
-    }
+		const jsonText = response.text.trim();
+		const result = JSON.parse(jsonText);
+		return result as GeneratedScenarios;
+	} catch (error) {
+		console.error("Error calling Gemini API for scenario generation:", error);
+		// Fallback mit 2 Szenarien
+		return {
+			scenarios: [
+				{
+					id: "scenario_1",
+					scenario: "Ihr Portfolio verliert unerwartet 20% an Wert. Wie reagieren Sie?",
+					options: [
+						{ title: "Sofort verkaufen", description: "Verluste begrenzen und Kapital sichern.", value: "option_a" },
+						{ title: "Abwarten", description: "Position halten und Erholung abwarten.", value: "option_b" },
+						{ title: "Nachkaufen", description: "Günstigen Einstieg für mehr Investment nutzen.", value: "option_c" }
+					]
+				},
+				{
+					id: "scenario_2",
+					scenario: "Eine risikoreiche Chance verspricht 30% Rendite in einem Jahr. Was tun Sie?",
+					options: [
+						{ title: "Ablehnen", description: "Risiko ist mir zu hoch.", value: "option_a" },
+						{ title: "Klein investieren", description: "Nur einen kleinen Teil investieren.", value: "option_b" },
+						{ title: "Voll einsteigen", description: "Maximale Chance nutzen.", value: "option_c" }
+					]
+				}
+			]
+		};
+	}
 }
 
-
 export async function getFinancialAnalysis(data: FormData): Promise<GeminiAnalysis> {
-  const selectedScenarioOption = data.step4.options.find(opt => opt.value === data.step4.answer);
+  // Sammle alle Szenario-Antworten
+  const scenarioAnswers = data.step4.scenarios?.map((scenario, index) => {
+    const selectedOption = scenario.options.find(opt => opt.value === data.step4.answers?.[scenario.id]);
+    return `Szenario ${index + 1}: "${scenario.scenario}" - Gewählte Reaktion: "${selectedOption?.title}: ${selectedOption?.description}"`;
+  }).join("\n") || "Keine Szenario-Antworten vorhanden";
   
   const prompt = `
     Führe eine Finanzanalyse für einen Kunden durch, basierend auf den folgenden Daten.
@@ -106,9 +154,8 @@ export async function getFinancialAnalysis(data: FormData): Promise<GeminiAnalys
     - Entscheidungsstil: ${data.step3.decisionStyle}
     - Investment-Erfahrung: ${data.step3.investmentExperience}
 
-    **Schritt 4: Reaktion auf KI-Szenario**
-    - Präsentiertes Szenario: "${data.step4.scenario}"
-    - Gewählte Reaktion: "${selectedScenarioOption?.title}: ${selectedScenarioOption?.description}"
+    **Schritt 4: Reaktionen auf KI-Szenarien**
+    ${scenarioAnswers}
     
     **Schritt 5: Risikoprofil (Fragebogen)**
     - Antworten zum Risikoprofil: ${JSON.stringify(data.step5.riskProfileAnswers, null, 2)}
@@ -117,7 +164,7 @@ export async function getFinancialAnalysis(data: FormData): Promise<GeminiAnalys
     **Analyseauftrag:**
 
     1.  **scoreText**: Gib eine Gesamtbewertung ab. Wähle EINEN der folgenden Werte: "Ausgezeichnet", "Gut", "Solide", "Optimierungsbedarf".
-    2.  **analyse**: Schreibe eine kurze, aber aufschlussreiche Zusammenfassung (2-3 Sätze). Berücksichtige insbesondere die Reaktion im KI-Szenario als wichtigen Indikator für das tatsächliche Verhalten. Gehe auf die Stärken und die größten Potenziale ein. Sei ermutigend und konstruktiv.
+    2.  **analyse**: Schreibe eine kurze, aber aufschlussreiche Zusammenfassung (2-3 Sätze). Berücksichtige insbesondere die Reaktionen in BEIDEN KI-Szenarien als wichtige Indikatoren für das tatsächliche Verhalten. Gehe auf die Stärken und die größten Potenziale ein. Sei ermutigend und konstruktiv.
     3.  **chartData**: Erstelle Daten für ein Radar-Diagramm. Bewerte die folgenden 6 Dimensionen auf einer Skala von 0 bis 100, basierend auf den Kundendaten. Die Subjects MÜSSEN exakt lauten: "Liquidität", "Sparrate", "Vermögen", "Risikomanagement", "Zielplanung", "Mindset".
     4.  **detailedAnalysis**: Erstelle eine detaillierte Analyse für JEDE der 6 Dimensionen aus chartData. Gib für jeden Subject eine kurze, konstruktive Erklärung (1-2 Sätze), die den Score begründet und einen konkreten Tipp gibt.
   `;
@@ -161,9 +208,9 @@ export async function getFinancialAnalysis(data: FormData): Promise<GeminiAnalys
       },
     });
 
-	if (!response.text) {
-		throw new Error("no res text")
-	}
+    if (!response.text) {
+        throw new Error("no res text")
+    }
 
     const jsonText = response.text.trim();
     const result = JSON.parse(jsonText);

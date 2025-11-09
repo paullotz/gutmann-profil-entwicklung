@@ -1,3 +1,20 @@
+export interface RiskQuestion {
+  id: string;
+  question: string;
+  options: Array<{
+    value: string;
+    title: string;
+    description: string;
+    riskScore: number; // 0-100, höher = risikofreudiger
+  }>;
+  category: 'loss_aversion' | 'regret_aversion' | 'time_horizon' | 'volatility' | 'opportunity' | 'emergency';
+}
+
+export interface StepProps {
+	setData: React.Dispatch<React.SetStateAction<FormData>>
+	data: FormData
+}
+
 export interface Step1Data {
   lifePhase: string;
   goals: {
@@ -44,9 +61,8 @@ export interface ScenarioOption {
 }
 
 export interface Step4Data {
-    scenario: string;
-    options: ScenarioOption[];
-    answer: string;
+  scenarios: GeneratedScenario[];  // Array statt einzelnes Szenario
+  answers: Record<string, string>; // Record für mehrere Antworten
 }
 
 export interface Step5Data {
@@ -76,6 +92,11 @@ export interface GeminiAnalysis {
 }
 
 export interface GeneratedScenario {
-    scenario: string;
-    options: ScenarioOption[];
+  id: string;
+  scenario: string;
+  options: ScenarioOption[];
+}
+
+export interface GeneratedScenarios {
+  scenarios: GeneratedScenario[];
 }
