@@ -1,5 +1,5 @@
-import App from "@/components/App"
+import { CheckRouter } from "@/components/check"
 
 export default function Page() {
-  return <App />
+  return <CheckRouter/>
 }

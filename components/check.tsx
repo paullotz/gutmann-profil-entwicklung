@@ -31,7 +31,7 @@ const initialFormData: FormData = {
 	step5: { riskProfileAnswers: {}, financialWorries: "" },
 };
 
-export default function App() {
+export const CheckRouter = () => {
 	const [currentStep, setCurrentStep] = useState(0)
 	const [formData, setFormData] = useState<FormData>(initialFormData)
 
@@ -40,7 +40,7 @@ export default function App() {
 
 	const progress = (currentStep / (TOTAL_STEPS - 1)) * 100
 
-	const renderStep = () => {
+	const Step = () => {
 		switch (currentStep) {
 			case 0: return <Start onNext={nextStep} />;
 			case 1: return <LifeGoals setData={setFormData} data={formData} />;
@@ -67,7 +67,7 @@ export default function App() {
 					)}
 				</header>
 
-				<main>{renderStep()}</main>
+				<main><Step /></main>
 
 				{currentStep > 0 && currentStep < TOTAL_STEPS && (
 					<footer className="mt-8 flex justify-between">

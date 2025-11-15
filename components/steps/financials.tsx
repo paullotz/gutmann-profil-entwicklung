@@ -2,7 +2,7 @@ import { Step2Data, StepProps } from "@/lib/types"
 import { Card, CardTitle, CardHeader, CardContent, CardDescription } from "../ui/card"
 import { Label } from "../ui/label"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip"
-import { InfoIcon } from "../Icons"
+import { InfoIcon } from "../icons"
 import { Input } from "../ui/input"
 
 export const Financials: React.FC<StepProps> = ({ setData, data }) => {

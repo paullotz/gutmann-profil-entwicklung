@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import React from 'react';
 import ReactPDF from '@react-pdf/renderer';
 
-import { FinancialCheckPDF } from '@/components/FinancialCheckPDF';
+import { FinancialCheckPDF } from '@/components/result-pdf';
 import { FormData, GeminiAnalysis } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
@@ -23,11 +23,11 @@ export async function POST(request: NextRequest) {
         formData: formData,
         analysis: analysis,
         consultationCode: consultationCode,
-        title: 'Your Financial Health Check',
+        title: 'Ihr finanzieller Check',
       })
     );
 
-    return new Response(pdfStream as any, { // 'as any' is a common workaround for stream types
+    return new Response(pdfStream as any, { 
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',

@@ -1,6 +1,5 @@
 import { generateRiskQuestions } from "@/lib/risk-questionts";
-import { useCallback, useEffect, useState } from "react";
-import { Loader } from "../loader";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
