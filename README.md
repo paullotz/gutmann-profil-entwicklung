@@ -1,101 +1,76 @@
-# Bank Gutmann - Financial Health Check
+# Financial Health Check
 
-A comprehensive AI-powered financial health assessment tool built with Next.js 15, React, and TypeScript.
+## Projektübersicht
 
-## Features
+Der **Financial Health Check** ist ein mehrstufiges Analysetool zur Erfassung eines ganzheitlichen Kundenprofils. Das System nutzt eine Large Language Model (LLM)-Integration zur dynamischen Inhaltserstellung und zur Durchführung der finalen Finanzanalyse. Das Frontend ist für die nahtlose Einbettung **per iFrame** in Host-Anwendungen konzipiert.
 
-- Multi-step financial assessment questionnaire
-- AI-powered analysis using Google Gemini
-- Interactive radar chart visualization
-- Responsive design with Tailwind CSS v4
-- shadcn/ui components with custom accent color (#749381)
+### Kernfunktionen
 
-## Getting Started
+* **Datenerfassung:** Erfasst finanzielle Fakten, Ziele und das Risikoverhalten.
 
-### Prerequisites
+* **Dynamische Szenarien:** Erstellung personalisierter Entscheidungssimulationen durch das LLM, um das Kundenverhalten zu testen (`step4`, `app/actions/analyze.ts`).
 
-- Node.js 18+ 
-- npm, yarn, or pnpm
+* **Strukturierte Analyse:** Generierung einer kategorisierten Analyse (Score, Chart-Daten, Detailerklärungen).
 
-### Installation
+* **Persistenz:** Speicherung aller Analysen in der Datenbank. Jeder Check erhält einen eindeutigen `consultationCode` (`app/api/data/route.ts`).
 
-1. Clone the repository
-2. Install dependencies:
-   \`\`\`bash
-   npm install
-   \`\`\`
+* **Reporting:** On-Demand-Erstellung eines PDF-Berichts der Analyseergebnisse (`app/api/pdf/route.ts`).
 
-3. Set up environment variables:
-   - Add your Gemini API key in the **Vars** section of the v0 in-chat sidebar, or
-   - Create a \`.env.local\` file based on \`.env.example\`:
-     \`\`\`bash
-     cp .env.example .env.local
-     \`\`\`
-   - Add your API key:
-     \`\`\`
-     GEMINI_API_KEY=your_actual_api_key
-     \`\`\`
+## Technischer Aufbau
 
-### Development
+Das Projekt basiert auf einer modernen Serverless-Architektur mit Next.js.
 
-Run the development server:
+### Technologiestack
 
-\`\`\`bash
-npm run dev
-\`\`\`
+| **Komponente** | **Technologie** | **Zweck** | 
+| :--- | :--- | :--- | 
+| **Framework** | Next.js (React) | Full-Stack-Entwicklung; nutzt Server Actions für die Backend-Kommunikation. | 
+| **LLM** | Google GenAI | Generierung von Szenarien und Durchführung der finalen Analyse. | 
+| **Datenbank** | PostgreSQL | Persistente und relationale Datenspeicherung (`lib/db/schema.ts`). | 
+| **ORM** | Drizzle ORM | Type-safe und performante Datenbankinteraktion. | 
+| **Reporting** | `@react-pdf/renderer` | Server-seitige Erstellung von PDF-Dokumenten. | 
 
-The app will be available at \`http://localhost:3000\`
+### Datenfluss (API & Integration)
 
-### Build
+1. **Client-Flow:** Der Client (im iFrame) sammelt Daten in 6 Schritten.
 
-Build for production:
+2. **LLM-Analyse:** Ausgelöst via Server Actions, sendet der Server strukturierte Prompts an das LLM (`app/actions/analyze.ts`).
 
-\`\`\`bash
-npm run build
-\`\`\`
+3. **Speicherung:** Die vollständigen Daten werden über den Endpoint `POST /api/data` gespeichert, wobei der `consultationCode` erzeugt und an den Client zurückgegeben wird.
 
-Start the production server:
+4. **Externer Zugriff:** Interne Systeme können abgeschlossene Analysen über den Endpoint `GET /api/data?code=...` (mit Authentifizierung) abrufen.
 
-\`\`\`bash
-npm run start
-\`\`\`
+## Einbettung (iFrame-Beispiel)
 
-## Project Structure
+Ein Beispiel für die Einbettung ist in der Datei `gutmann_embedded.html` enthalten. Die Anwendung ist darauf optimiert, über iFrames in andere Portale integriert zu werden, wobei der `CheckRouter` den gesamten Zustand verwaltet.
 
-\`\`\`
-app/
-├── actions/
-│   └── analyze.ts          # Server action for AI analysis
-├── layout.tsx              # Root layout
-├── page.tsx                # Home page
-└── globals.css             # Global styles with Tailwind v4
-components/
-├── ui/                     # shadcn/ui components
-├── App.tsx                 # Main application component
-├── RadarChartComponent.tsx # Chart visualization
-└── icons.tsx               # Icon components
-lib/
-└── utils.ts                # Utility functions
-services/
-└── geminiService.ts        # (deprecated - moved to server action)
-types.ts                    # TypeScript type definitions
-\`\`\`
+## Entwicklung
 
-## Technologies
+### Voraussetzungen
 
-- Next.js 15 (App Router)
-- React 19
-- TypeScript
-- Tailwind CSS v4
-- shadcn/ui components
-- Recharts
-- Google Gemini AI
-- Radix UI primitives
+* Node.js
 
-## Environment Variables
+* PostgreSQL-Datenbank
 
-The app requires the following environment variable:
+* Google Gemini API Key
 
-- \`GEMINI_API_KEY\`: Your Google Gemini API key (server-side only for security)
+### Umgebungsvariablen
 
-You can set this in the v0 **Vars** section or in a \`.env.local\` file.
+Die folgenden Variablen müssen in der `.env.local` Datei konfiguriert werden:
+
+```
+DATABASE_URL="postgres://user:password@host:port/database"
+GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
+```
+
+# Starten der Datenbank
+`docker compose up`
+
+# Abhängigkeiten installieren
+`pnpm install`
+
+# Lokalen Entwicklungsserver starten
+`pnpm run dev`
+
+
+Hinweis: Drizzle Migration-Befehle müssen separat ausgeführt werden, um das Schema zu initialisieren.
