@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Gutmann | Anlegerprofil Entwicklung</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&family=Great+Vibes&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gutmann: {
+                            cream: '#F9F6F0',    // Background Cream
+                            sage: '#6A7C73',     // Card Green
+                            dark: '#1A1A1A',     // Primary Text
+                            lime: '#DCE558',     // Accent/Hover
+                            gray: '#888888'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                        script: ['Great Vibes', 'cursive'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Circle Icon Styling */
+        .icon-circle {
+            border: 1px solid currentColor;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        /* Iframe Container Shadow */
+        .iframe-wrapper {
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.08);
+        }
+
+        /* Vertical Text Class for Side Tab */
+        .writing-vertical {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+    </style>
+</head>
+<body class="bg-gutmann-cream text-gutmann-dark font-sans antialiased selection:bg-gutmann-sage selection:text-white">
+
+    <header class="fixed top-0 left-0 right-0 z-50 bg-gutmann-cream/95 backdrop-blur-sm transition-all duration-300 py-5 px-6 md:px-12 border-b border-transparent">
+        <div class="max-w-[1800px] mx-auto flex items-center justify-between">
+            
+            <div class="flex items-center gap-8">
+                <button class="flex flex-col gap-1.5 w-6 group hover:opacity-70">
+                    <span class="h-[1px] w-full bg-current"></span>
+                    <span class="h-[1px] w-full bg-current"></span>
+                </button>
+
+                <nav class="hidden xl:flex gap-8 text-[13px] font-bold tracking-wide uppercase">
+                    <a href="#" class="hover:opacity-60 transition">Private Banking</a>
+                    <a href="#" class="hover:opacity-60 transition">Institutional Banking</a>
+                    <a href="#" class="hover:opacity-60 transition">Invest</a>
+                </nav>
+            </div>
+
+            <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                <a href="#" class="flex flex-col items-center group">
+                    <span class="font-script text-4xl md:text-5xl leading-none pt-2 group-hover:opacity-80 transition">Gutmann</span>
+                    <span class="text-[10px] tracking-[0.2em] uppercase mt-1 font-medium text-gray-600">Private Bankers</span>
+                </a>
+            </div>
+
+            <div class="flex items-center gap-6 md:gap-8 text-[14px] font-medium">
+                <nav class="hidden lg:flex gap-6">
+                    <a href="#" class="border-b border-black pb-0.5">Über uns</a>
+                    <a href="#" class="hover:opacity-60 transition">Kontakt</a>
+                    <a href="#" class="hover:opacity-60 transition">Karriere</a>
+                    <a href="#" class="hover:opacity-60 transition">ESG</a>
+                </nav>
+                
+                <div class="hidden lg:block h-4 w-[1px] bg-gray-300"></div>
+
+                <div class="flex items-center gap-1 cursor-pointer hover:opacity-60">
+                    <span>DE</span>
+                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+
+                <a href="#" class="flex items-center gap-3 group">
+                    <span class="hidden md:inline">Login</span>
+                    <div class="w-8 h-8 icon-circle group-hover:border-gutmann-sage group-hover:bg-gutmann-sage group-hover:text-white transition-colors">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <section class="relative h-[60vh] min-h-[500px] w-full overflow-hidden mt-[90px] md:mt-0">
+        <img 
+            src="https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?q=80&w=2038&auto=format&fit=crop" 
+            alt="Sprung ins Wasser" 
+            class="absolute inset-0 w-full h-full object-cover object-top"
+        >
+        
+        <div class="absolute inset-0 bg-black/10 flex flex-col items-center justify-center text-center px-4">
+            <h1 class="text-white max-w-5xl drop-shadow-md">
+                <span class="block font-serif text-5xl md:text-7xl lg:text-8xl opacity-95 mb-4 leading-tight">
+                    Werte schaffen.
+                </span>
+                <span class="block font-serif text-5xl md:text-7xl lg:text-8xl font-bold leading-tight italic">
+                    Zukunft sichern.
+                </span>
+            </h1>
+        </div>
+    </section>
+
+    <main class="w-full bg-gutmann-cream pb-24">
+        
+        <div class="max-w-[1400px] mx-auto px-6 py-20 md:py-28 text-center md:text-left">
+            <h2 class="font-serif text-4xl md:text-6xl text-gutmann-dark mb-10 leading-[1.1]">
+                Ihre persönliche Anlagestrategie.
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12">
+                <div class="md:col-start-1 md:col-span-8 text-lg md:text-xl text-gray-700 font-light leading-relaxed">
+                    <p class="mb-6">
+                        Die Grundlage jeder erfolgreichen Vermögensverwaltung ist das Verständnis Ihrer individuellen Ziele, Ihrer Risikotoleranz und Ihrer Erwartungen.
+                    </p>
+                    <p>
+                        Nutzen Sie unser <strong>digitales Profiling-Tool</strong> unten, um Ihre Präferenzen zu analysieren. Basierend auf Ihren Angaben entwickeln wir eine maßgeschneiderte Struktur für Ihr Portfolio – persönlich, weitsichtig und transparent.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full max-w-[1600px] mx-auto px-4 md:px-6 mb-32">
+            <div class="iframe-wrapper bg-white rounded-xl overflow-hidden border border-gray-200/50 relative">
+                <div class="absolute inset-0 flex items-center justify-center bg-gray-50 -z-10">
+                    <span class="text-gray-400 text-sm">Lade Profil-Tool...</span>
+                </div>
+                
+                <iframe 
+                    src="https://gutmann-profil-entwicklung.vercel.app/" 
+                    class="w-full h-[850px] md:h-[950px] border-0"
+                    title="Gutmann Profil Entwicklung Check"
+                    loading="lazy"
+                    allowfullscreen
+                ></iframe>
+            </div>
+            <div class="mt-4 text-center text-xs text-gray-400">
+                Sichere Verbindung via SSL-Verschlüsselung. Ihre Daten werden vertraulich behandelt.
+            </div>
+        </div>
+
+        <div class="max-w-[1400px] mx-auto px-6 mb-32 border-t border-gray-200 pt-20">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-32">
+                <div>
+                    <h3 class="font-bold text-lg mb-4">30,4 Mrd. € verwaltetes Kundenvermögen</h3>
+                    <p class="text-gray-600 font-light leading-relaxed">
+                        Zu unseren Kunden zählen vermögende Privatpersonen, Unternehmer, Stiftungen und institutionelle Investoren.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-4">100 % im Eigentum der Familie und Partner</h3>
+                    <p class="text-gray-600 font-light leading-relaxed">
+                        Die Mehrheit der Bank befindet sich im Besitz der Familie Kahane. Zum Kreis der Eigentümer zählen zudem leitende Mitarbeiter als Partner.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-[1400px] mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <a href="#" class="group relative block bg-gutmann-sage rounded-2xl p-10 h-72 transition hover:brightness-105 overflow-hidden">
+                    <div class="flex justify-between items-start">
+                        <span class="text-white text-xl font-medium">Presse</span>
+                        <div class="w-12 h-12 rounded-full border border-gutmann-lime/50 flex items-center justify-center text-gutmann-lime transition-transform duration-500 group-hover:rotate-45">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-10 left-10 text-white/90 text-lg font-light">
+                        Zu unserem Medien-Service
+                    </div>
+                </a>
+
+                <a href="#" class="group relative block bg-gutmann-sage rounded-2xl p-10 h-72 transition hover:brightness-105 overflow-hidden">
+                    <div class="flex justify-between items-start">
+                        <span class="text-white text-xl font-medium">Geschäftsbericht</span>
+                        <div class="w-12 h-12 rounded-full border border-gutmann-lime/50 flex items-center justify-center text-gutmann-lime transition-transform duration-500 group-hover:translate-y-1">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-10 left-10 text-white/90 text-lg font-light">
+                        Jahresbericht herunterladen
+                    </div>
+                </a>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gutmann-cream border-t border-gray-200 py-20 px-6">
+        <div class="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 text-sm text-gray-500">
+            
+            <div class="md:col-span-1">
+                <a href="#" class="font-script text-3xl text-gutmann-dark block mb-4">Gutmann</a>
+                <p class="mb-2">Schwarzenbergplatz 16</p>
+                <p class="mb-2">1010 Wien, Österreich</p>
+                <p>T: +43-1-502 20-0</p>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-gutmann-dark uppercase text-xs mb-4 tracking-widest">Rechtliches</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:text-gutmann-dark transition">Impressum</a></li>
+                    <li><a href="#" class="hover:text-gutmann-dark transition">Datenschutz</a></li>
+                    <li><a href="#" class="hover:text-gutmann-dark transition">Rechtliche Hinweise</a></li>
+                    <li><a href="#" class="hover:text-gutmann-dark transition">Whistleblowing</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-gutmann-dark uppercase text-xs mb-4 tracking-widest">Services</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:text-gutmann-dark transition">Öffnungszeiten</a></li>
+                    <li><a href="#" class="hover:text-gutmann-dark transition">Downloads</a></li>
+                    <li><a href="#" class="hover:text-gutmann-dark transition">Presse</a></li>
+                </ul>
+            </div>
+            
+            <div class="md:col-span-1 flex items-end justify-start md:justify-end">
+                <p>&copy; 2025 Bank Gutmann AG</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="fixed right-0 top-1/2 -translate-y-1/2 bg-gutmann-lime text-xs font-bold py-4 px-1.5 rounded-l-md shadow-lg cursor-pointer z-50 hover:bg-[#cdd645] transition writing-vertical">
+        <span class="block transform rotate-180">Kontakt aufnehmen.</span>
+    </div>
+
+</body>
+</html>
