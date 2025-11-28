@@ -32,53 +32,52 @@ const initialFormData: FormData = {
 };
 
 export const CheckRouter = () => {
-	const [currentStep, setCurrentStep] = useState(0)
-	const [formData, setFormData] = useState<FormData>(initialFormData)
+    const [currentStep, setCurrentStep] = useState(0)
+    const [formData, setFormData] = useState<FormData>(initialFormData)
 
-	const nextStep = () => setCurrentStep((prev) => (prev < TOTAL_STEPS ? prev + 1 : prev))
-	const prevStep = () => setCurrentStep((prev) => (prev > 0 ? prev - 1 : prev))
+    const nextStep = () => setCurrentStep((prev) => (prev < TOTAL_STEPS ? prev + 1 : prev))
+    const prevStep = () => setCurrentStep((prev) => (prev > 0 ? prev - 1 : prev))
 
-	const progress = (currentStep / (TOTAL_STEPS - 1)) * 100
+    const progress = (currentStep / (TOTAL_STEPS - 1)) * 100
 
-	const Step = () => {
-		switch (currentStep) {
-			case 0: return <Start onNext={nextStep} />;
-			case 1: return <LifeGoals setData={setFormData} data={formData} />;
-			case 2: return <Financials setData={setFormData} data={formData} />;
-			case 3: return <Mindset setData={setFormData} data={formData} />;
-			case 4: return <ScenarioSimulation setData={setFormData} data={formData} />;
-			case 5: return <RiskProfile setData={setFormData} data={formData} />;
-			case 6: return <Results data={formData} />;
-			default: return <Start onNext={nextStep} />;
-		}
-	};
+    const renderCurrentStep = () => {
+        switch (currentStep) {
+            case 0: return <Start onNext={nextStep} />;
+            case 1: return <LifeGoals setData={setFormData} data={formData} />;
+            case 2: return <Financials setData={setFormData} data={formData} />;
+            case 3: return <Mindset setData={setFormData} data={formData} />;
+            case 4: return <ScenarioSimulation setData={setFormData} data={formData} />;
+            case 5: return <RiskProfile setData={setFormData} data={formData} />;
+            case 6: return <Results data={formData} />;
+            default: return <Start onNext={nextStep} />;
+        }
+    };
 
-	return (
-		<div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-			<div className="w-full max-w-2xl mx-auto">
-				<header className="mb-8">
-					{currentStep > 0 && currentStep < TOTAL_STEPS && (
-						<div className="mb-4">
-							<Progress value={progress} />
-							<p className="text-sm text-right mt-1 text-muted-foreground">
-								Schritt {currentStep} von {TOTAL_STEPS - 1}
-							</p>
-						</div>
-					)}
-				</header>
+    return (
+        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+            <div className="w-full max-w-2xl mx-auto">
+                <header className="mb-8">
+                    {currentStep > 0 && currentStep < TOTAL_STEPS && (
+                        <div className="mb-4">
+                            <Progress value={progress} />
+                            <p className="text-sm text-right mt-1 text-muted-foreground">
+                                Schritt {currentStep} von {TOTAL_STEPS - 1}
+                            </p>
+                        </div>
+                    )}
+                </header>
 
-				<main><Step /></main>
+                <main>{renderCurrentStep()}</main>
 
-				{currentStep > 0 && currentStep < TOTAL_STEPS && (
-					<footer className="mt-8 flex justify-between">
-						<Button variant="outline" onClick={prevStep}>
-							Zurück
-						</Button>
-						<Button onClick={nextStep}>{currentStep === TOTAL_STEPS - 1 ? "Analyse ansehen" : "Weiter"}</Button>
-					</footer>
-				)}
-			</div>
-		</div>
-	)
+                {currentStep > 0 && currentStep < TOTAL_STEPS && (
+                    <footer className="mt-8 flex justify-between">
+                        <Button variant="outline" onClick={prevStep}>
+                            Zurück
+                        </Button>
+                        <Button onClick={nextStep}>{currentStep === TOTAL_STEPS - 1 ? "Analyse ansehen" : "Weiter"}</Button>
+                    </footer>
+                )}
+            </div>
+        </div>
+    )
 }
-
