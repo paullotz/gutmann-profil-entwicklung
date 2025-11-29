@@ -1,11 +1,9 @@
-// app/api/data/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { financialChecks } from '@/lib/db/schema';
 import { desc, eq } from 'drizzle-orm';
 
-// Funktion zum Generieren des Beratungscodes
-function generateConsultationCode(): string {
+export const generateConsultationCode = (): string => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let code = "GUT-";
   for (let i = 0; i < 6; i++) {
@@ -14,15 +12,32 @@ function generateConsultationCode(): string {
   return code;
 }
 
+export const validateApiKey = (request: NextRequest): boolean => {
+  const apiKey = request.headers.get('x-api-key') || request.headers.get('authorization')?.replace('Bearer ', '');
+  const validApiKey = process.env.API_KEY;
+
+  if (!validApiKey) {
+    console.error('API_KEY is not configured in environment variables');
+    return false;
+  }
+
+  return apiKey === validApiKey;
+}
+
 export async function POST(request: NextRequest) {
+  if (!validateApiKey(request)) {
+    return NextResponse.json({
+      success: false,
+      error: 'Unauthorized - Invalid or missing API key',
+    }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const { formData, analysis } = body;
 
-    // Generiere eindeutigen Beratungscode
     let consultationCode = generateConsultationCode();
     
-    // Stelle sicher, dass der Code eindeutig ist
     let existingCode = await db
       .select()
       .from(financialChecks)
@@ -38,7 +53,6 @@ export async function POST(request: NextRequest) {
         .limit(1);
     }
 
-    // Speichere die Daten
     const [entry] = await db
       .insert(financialChecks)
       .values({
@@ -95,12 +109,18 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  if (!validateApiKey(request)) {
+    return NextResponse.json({
+      success: false,
+      error: 'Unauthorized - Invalid or missing API key',
+    }, { status: 401 });
+  }
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const code = searchParams.get('code');
     const limit = searchParams.get('limit');
 
-    // Wenn ein Code angegeben ist, hole nur diesen Eintrag
     if (code) {
       const [entry] = await db
         .select()
@@ -121,7 +141,6 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Ansonsten hole alle Einträge
     let query = db
       .select()
       .from(financialChecks)
