@@ -50,25 +50,25 @@ export const Results: React.FC<{ data: FormData }> = ({ data }) => {
 
 	const financialTips = useMemo(() => {
 		const tips = [
-			"💡 Die 50/30/20-Regel: 50% für Notwendiges, 30% für Wünsche, 20% zum Sparen",
-			"📈 Zeit im Markt schlägt Market Timing - Langfristig investieren zahlt sich aus",
-			"🛡️ Ein Notgroschen von 3-6 Monatsausgaben gibt finanzielle Sicherheit",
-			"🎯 Diversifikation ist der einzige Free Lunch beim Investieren",
-			"💰 Beginnen Sie früh - Der Zinseszins ist Ihr bester Freund",
+			"Co-Investment: Wir investieren unser eigenes Geld in dieselben Strategien wie unsere Kunden.",
+			"Echter Vermögenserhalt bedeutet, auch nach Inflation und Steuern positive Realrenditen zu erzielen.",
+			"Ganzheitliche Betrachtung: Ihr liquides Vermögen sollte immer im Kontext Ihrer unternehmerischen und familiären Situation stehen.",
+			"Strategische Asset Allokation ist der wichtigste Treiber für die langfristige Portfolio-Performance.",
 		];
 
-		// Personalisiere basierend auf Zielen
 		if (data.step1.goals.retirement) {
-			tips.push("🏖️ Je früher Sie für die Rente sparen, desto weniger müssen Sie monatlich zurücklegen");
+			tips.push("Generationenübergreifendes Denken: Wir strukturieren Vermögen so, dass es langfristig Bestand hat.");
 		}
 		if (data.step1.goals.realEstate) {
-			tips.push("🏠 Eigenkapital von mindestens 20% senkt die Kreditkosten erheblich");
+			tips.push("Immobilien sind ein wichtiger Stabilitätsanker, erfordern jedoch ein professionelles Liquiditätsmanagement.");
 		}
 		if (data.step3.investmentExperience === "Keine") {
-			tips.push("📚 ETFs sind ein guter Einstieg für Anfänger - breit diversifiziert und kostengünstig");
+			tips.push("Sicherheit durch Expertise: Überlassen Sie die täglichen Marktentscheidungen erfahrenen Portfoliomanagern.");
+		} else {
+			tips.push("Private Markets: Wir eröffnen Zugang zu Anlageklassen, die institutionellen Investoren vorbehalten sind.");
 		}
 		if (data.step3.moneyFeelings.includes("Stress")) {
-			tips.push("🧘 Ein klarer Finanzplan reduziert Stress und gibt Kontrolle zurück");
+			tips.push("Disziplin statt Emotion: Ein strukturierter Investmentprozess schützt vor impulsiven Entscheidungen in volatilen Phasen.");
 		}
 
 		return tips;
