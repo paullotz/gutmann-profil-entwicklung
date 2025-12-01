@@ -1,0 +1,20 @@
+LICENSE FOR PROPRIETARY SOFTWARE
+Copyright (c) 2025 FH Wien Gruppe 8
+
+1. Preamble
+This software package (the "Software"), developed by Gruppe 8, is provided for viewing, evaluation, and educational purposes only. It is intended to demonstrate the "Financial Health & Mindset Profiler" prototype.
+
+2. Permitted Uses
+You are granted a non-exclusive, non-transferable, revocable license to:
+- View the source code on the hosting platform (e.g., GitHub).
+- Fork the repository for the sole purpose of personal study or educational review, provided that this License file is retained unchanged.
+
+3. Restrictions (No Modification / No Derivatives)
+Without prior written permission from the copyright holders, you may NOT:
+- Modify, translate, adapt, or otherwise create derivative works or improvements of the Software (e.g., you may not build extensions or change the code logic).
+- Distribute, sublicense, lease, lend, or rent the Software to any third party.
+- Use the Software for any commercial purpose or in a production environment.
+- Remove, delete, alter, or obscure any trademarks or copyright notices.
+
+4. No Warranty
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

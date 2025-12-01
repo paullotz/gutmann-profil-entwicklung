@@ -39,5 +39,14 @@ export const financialChecks = pgTable('financial_checks', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+export const testerFeedback = pgTable('tester_feedback', {
+  id: serial('id').primaryKey(),
+  consultationCode: text('consultation_code'),
+  rating: integer('rating').notNull(),
+  comment: text('comment').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 export type FinancialCheck = typeof financialChecks.$inferSelect;
 export type NewFinancialCheck = typeof financialChecks.$inferInsert;
+export type NewTesterFeedback = typeof testerFeedback.$inferInsert;

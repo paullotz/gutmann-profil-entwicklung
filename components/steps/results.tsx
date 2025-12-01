@@ -10,6 +10,7 @@ import { Label } from "../ui/label";
 import { LoaderCircle } from "lucide-react";
 import { RadarChart } from "../radar-chart";
 import { CalendarIcon, CopyIcon } from "@radix-ui/react-icons";
+import { FeedbackForm } from "../feedback-form";
 
 export const Results: React.FC<{ data: FormData }> = ({ data }) => {
 	const [analysis, setAnalysis] = useState<GeminiAnalysis | null>(null);
@@ -360,6 +361,7 @@ export const Results: React.FC<{ data: FormData }> = ({ data }) => {
 				</CardContent>
 			</Card>
 
+			<FeedbackForm consultationCode={consultationCode} />
 
 			{isModalOpen && (
 				<div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center" onClick={() => setIsModalOpen(false)}>
