@@ -15,16 +15,16 @@ export const ScenarioSimulation: React.FC<StepProps> = ({ setData, data }) => {
 			setIsLoading(false);
 			return;
 		}
-		
+
 		setIsLoading(true);
 		setError(null);
 		try {
 			const result = await generateDynamicScenarios(data);
 			setData(prev => ({
 				...prev,
-				step4: { 
-					scenarios: result.scenarios, 
-					answers: {} 
+				step4: {
+					scenarios: result.scenarios,
+					answers: {}
 				}
 			}));
 			setHasLoaded(true);
@@ -37,18 +37,18 @@ export const ScenarioSimulation: React.FC<StepProps> = ({ setData, data }) => {
 
 	useEffect(() => {
 		fetchScenarios();
-	});
+	}, [fetchScenarios]);
 
 	const handleAnswer = (scenarioId: string, value: string) => {
-		setData(prev => ({ 
-			...prev, 
-			step4: { 
-				...prev.step4, 
+		setData(prev => ({
+			...prev,
+			step4: {
+				...prev.step4,
 				answers: {
 					...prev.step4.answers,
 					[scenarioId]: value
 				}
-			} 
+			}
 		}));
 	};
 
@@ -77,11 +77,10 @@ export const ScenarioSimulation: React.FC<StepProps> = ({ setData, data }) => {
 							<div
 								key={opt.value}
 								onClick={() => handleAnswer(scenario.id, opt.value)}
-								className={`p-4 border rounded-lg cursor-pointer transition-all ${
-									step4.answers?.[scenario.id] === opt.value 
-										? "border-primary bg-primary/5 ring-2 ring-primary" 
-										: "hover:bg-muted/50 hover:border-muted-foreground/20"
-								}`}
+								className={`p-4 border rounded-lg cursor-pointer transition-all ${step4.answers?.[scenario.id] === opt.value
+									? "border-primary bg-primary/5 ring-2 ring-primary"
+									: "hover:bg-muted/50 hover:border-muted-foreground/20"
+									}`}
 							>
 								<h4 className="font-semibold">{opt.title}</h4>
 								<p className="text-sm text-muted-foreground">{opt.description}</p>

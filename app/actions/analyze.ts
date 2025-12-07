@@ -4,11 +4,38 @@ import { GoogleGenAI, Type } from "@google/genai";
 import type { FormData, GeminiAnalysis, GeneratedScenarios } from '../../lib/types';
 
 const API_KEY = process.env.GEMINI_API_KEY;
+const MODEL = "gemini-2.5-flash"
 
 if (!API_KEY) {
   console.warn("API_KEY environment variable not set. Using a placeholder. Please set your API key.");
 }
 const ai = new GoogleGenAI({ apiKey: API_KEY || "YOUR_API_KEY_HERE" });
+
+export async function checkAvailableModels() {
+  console.log("Fetching available models...");
+  try {
+    // The SDK method to list models
+    const response = await ai.models.list();
+    
+    // Log them to your server console
+    console.log("--- AVAILABLE MODELS ---");
+    // The response structure usually contains a 'models' array
+    // We try to map over it, or just log the raw response if structure varies
+    if (Array.isArray(response)) {
+        response.forEach(m => console.log(m.name));
+    } else if (response && 'models' in response && Array.isArray((response as any).models)) {
+        (response as any).models.forEach((m: any) => console.log(m.name));
+    } else {
+        console.log(JSON.stringify(response, null, 2));
+    }
+    console.log("------------------------");
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Error listing models:", error);
+    return { success: false, error: String(error) };
+  }
+}
 
 export async function generateDynamicScenarios(data: Pick<FormData, 'step1' | 'step2' | 'step3'>): Promise<GeneratedScenarios> {
     const relevantGoals = Object.entries(data.step1.goals)
@@ -81,7 +108,7 @@ export async function generateDynamicScenarios(data: Pick<FormData, 'step1' | 's
 
     try {
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash", 
+            model: MODEL, 
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
@@ -172,7 +199,7 @@ export async function getFinancialAnalysis(data: FormData): Promise<GeminiAnalys
 
 	try {
 		const response = await ai.models.generateContent({
-			model: "gemini-2.5-flash",
+			model: MODEL,
 			contents: prompt,
 			config: {
 				responseMimeType: "application/json",
