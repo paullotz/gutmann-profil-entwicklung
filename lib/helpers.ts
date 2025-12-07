@@ -1,3 +1,4 @@
+import { NextRequest } from "next/server"
 import { FormData } from "./types"
 
 export const determineScenario = (data: FormData) => {
@@ -82,4 +83,31 @@ export const determineScenario = (data: FormData) => {
 			{ value: "Nachkaufen", title: "Nachkaufen", description: "Eine günstige Gelegenheit, mehr zu investieren." },
 		],
 	}
+}
+
+export const validateOrigin = (request: NextRequest): boolean => {
+  if (process.env.NODE_ENV === 'development') return true;
+
+  const origin = request.headers.get('origin');
+  const referer = request.headers.get('referer');
+  
+  const ALLOWED_DOMAIN = process.env.NEXT_PUBLIC_APP_URL || "https://gutmann-profil-entwicklung.vercel.app";
+
+  if (origin && origin.startsWith(ALLOWED_DOMAIN)) return true;
+  if (referer && referer.startsWith(ALLOWED_DOMAIN)) return true;
+
+  return false;
+};
+
+
+export const validateApiKey = (request: NextRequest): boolean => {
+  const apiKey = request.headers.get('x-api-key') || request.headers.get('authorization')?.replace('Bearer ', '');
+  const validApiKey = process.env.API_KEY;
+
+  if (!validApiKey) {
+    console.error('API_KEY is not configured in environment variables');
+    return false;
+  }
+
+  return apiKey === validApiKey;
 }
