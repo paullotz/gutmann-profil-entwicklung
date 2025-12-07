@@ -10,6 +10,7 @@ import { Slider } from "../ui/slider"
 // Step 1
 export const LifeGoals: React.FC<StepProps> = ({ setData, data }) => {
 	const { step1 } = data
+
 	const handleGoalChange = (goal: keyof Step1Data["goals"]) => {
 		setData((prev) => ({
 			...prev,
@@ -18,17 +19,17 @@ export const LifeGoals: React.FC<StepProps> = ({ setData, data }) => {
 	}
 
 	const goalLabels: Record<keyof Step1Data["goals"], string> = {
-		retirement: "Altersvorsorge",
-		realEstate: "Immobilie",
-		wealth: "Vermögensaufbau",
+		retirement: "Ruhestand & Nachfolgeplanung", // Statt "Altersvorsorge"
+		realEstate: "Real Estate Investments",      // Statt "Immobilie"
+		wealth: "Vermögensstrukturierung",          // Statt "Vermögensaufbau"
 		other: "Andere",
 	}
 
 	return (
 		<Card className="shadow-sm">
 			<CardHeader>
-				<CardTitle>Lebenssituation & Finanzziele</CardTitle>
-				<CardDescription>Wo stehen Sie und was ist Ihnen wichtig?</CardDescription>
+				<CardTitle>Lebenssituation & Strategie</CardTitle>
+				<CardDescription>In welcher Phase befinden Sie sich und welche Prioritäten setzen Sie?</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-6">
 				<div className="space-y-2">
@@ -42,27 +43,30 @@ export const LifeGoals: React.FC<StepProps> = ({ setData, data }) => {
 						</SelectTrigger>
 						<SelectContent>
 							<SelectGroup>
-								<SelectItem value="Berufseinsteiger">Berufseinsteiger</SelectItem>
-								<SelectItem value="Karriere-Aufbau">Karriere-Aufbau</SelectItem>
-								<SelectItem value="Familiengründung">Familiengründung</SelectItem>
+								<SelectItem value="Next Generation">Next Generation</SelectItem>
+								<SelectItem value="Unternehmer">Unternehmer</SelectItem>
+								<SelectItem value="Family Office">Family Office</SelectItem>
 								<SelectItem value="Vor dem Ruhestand">Vor dem Ruhestand</SelectItem>
-								<SelectItem value="Im Ruhestand">Im Ruhestand</SelectItem>
+								<SelectItem value="Im Ruhestand">Privatier</SelectItem>
 							</SelectGroup>
 						</SelectContent>
 					</Select>
 				</div>
 				<div className="space-y-4">
 					<div className="flex items-center gap-2">
-						<Label>Was sind Ihre finanziellen Ziele?</Label>
-						<TooltipProvider>
+						<Label>Was sind die Schwerpunkte Ihrer Strategie?</Label>
+						<TooltipProvider delayDuration={0}>
 							<Tooltip>
 								<TooltipTrigger asChild>
-									<button type="button">
-										<InfoIcon className="h-4 w-4"/>
+									<button type="button" className="text-muted-foreground hover:text-primary transition-colors">
+										<InfoIcon className="h-4 w-4" />
 									</button>
 								</TooltipTrigger>
-								<TooltipContent>
-									<p>Ziele können Altersvorsorge, der Kauf einer Immobilie oder allgemeiner Vermögensaufbau sein.</p>
+								<TooltipContent className="max-w-[300px] bg-slate-900 text-white p-3">
+									<p className="leading-snug">
+										Wählen Sie die Bereiche aus, die für Ihre Zukunft oder Ihre Familie am wichtigsten sind.
+										Das hilft uns dabei, Ihr Vermögen passend zu Ihren Wünschen aufzuteilen.
+									</p>
 								</TooltipContent>
 							</Tooltip>
 						</TooltipProvider>
@@ -80,7 +84,7 @@ export const LifeGoals: React.FC<StepProps> = ({ setData, data }) => {
 							</div>
 							{step1.goals[key] && (
 								<div className="p-4 border rounded-lg space-y-4 bg-muted/50 animate-fade-in mt-2 ml-6">
-									<h4 className="font-semibold">Details zu: {goalLabels[key]}</h4>
+									<h4 className="font-semibold">Fokus: {goalLabels[key]}</h4>
 									<div className="space-y-2">
 										<Label>Priorität (0-100): {step1.goalDetails[key].priority}</Label>
 										<Slider
@@ -127,10 +131,10 @@ export const LifeGoals: React.FC<StepProps> = ({ setData, data }) => {
 											</SelectTrigger>
 											<SelectContent>
 												<SelectGroup>
-													<SelectItem value="0-5 Jahre">0-5 Jahre</SelectItem>
-													<SelectItem value="5-10 Jahre">5-10 Jahre</SelectItem>
-													<SelectItem value="10-20 Jahre">10-20 Jahre</SelectItem>
-													<SelectItem value="20+ Jahre">20+ Jahre</SelectItem>
+													<SelectItem value="0-5 Jahre">0-5 Jahre (Kurzfristig)</SelectItem>
+													<SelectItem value="5-10 Jahre">5-10 Jahre (Mittelfristig)</SelectItem>
+													<SelectItem value="10-20 Jahre">10-20 Jahre (Langfristig)</SelectItem>
+													<SelectItem value="20+ Jahre">20+ Jahre (Generationenübergreifend)</SelectItem>
 												</SelectGroup>
 											</SelectContent>
 										</Select>

@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
-import { LoaderCircle } from "lucide-react";
+import { ChevronRight, LoaderCircle } from "lucide-react";
 import { RadarChart } from "../radar-chart";
 import { CalendarIcon, CopyIcon } from "@radix-ui/react-icons";
 import { FeedbackForm } from "../feedback-form";
@@ -74,7 +74,6 @@ export const Results: React.FC<{ data: FormData }> = ({ data }) => {
 		return tips;
 	}, [data]);
 
-	const [currentTipIndex, setCurrentTipIndex] = useState(0);
 	const handleDownloadPDF = async () => {
 		setIsDownloadingPDF(true);
 
@@ -155,7 +154,6 @@ export const Results: React.FC<{ data: FormData }> = ({ data }) => {
 		});
 	};
 
-
 	const scoreColors: Record<string, string> = {
 		Ausgezeichnet: "text-green-600 bg-green-100",
 		Gut: "text-green-600 bg-green-100",
@@ -163,13 +161,18 @@ export const Results: React.FC<{ data: FormData }> = ({ data }) => {
 		Optimierungsbedarf: "text-orange-600 bg-orange-100"
 	};
 
-	// Wechsle Tipp alle 3 Sekunden
+	const [currentTipIndex, setCurrentTipIndex] = useState(0);
+
+	const handleNextTip = () => {
+		setCurrentTipIndex((prev) => (prev + 1) % financialTips.length);
+	};
+
 	useEffect(() => {
 		if (!isLoading) return;
 
 		const interval = setInterval(() => {
 			setCurrentTipIndex((prev) => (prev + 1) % financialTips.length);
-		}, 3000);
+		}, 8000);
 
 		return () => clearInterval(interval);
 	}, [isLoading, financialTips.length]);
@@ -187,9 +190,9 @@ export const Results: React.FC<{ data: FormData }> = ({ data }) => {
 				<div className="h-full bg-primary animate-progress-indeterminate"></div>
 			</div>
 
-			{/* Animierte Finanztipps */}
-			<div className="bg-muted/50 rounded-lg p-6 min-h-[100px] flex items-center justify-center">
-				<div className="space-y-2">
+			{/* Animierte Finanztipps MIT BUTTON */}
+			<div className="bg-muted/50 rounded-lg p-6 min-h-[140px] flex flex-col items-center justify-center transition-all">
+				<div className="space-y-2 mb-4">
 					<p className="text-xs font-semibold text-primary uppercase tracking-wide">
 						Finanztipp #{currentTipIndex + 1}
 					</p>
@@ -200,6 +203,14 @@ export const Results: React.FC<{ data: FormData }> = ({ data }) => {
 						{financialTips[currentTipIndex]}
 					</p>
 				</div>
+				<Button
+					variant="ghost"
+					size="sm"
+					onClick={handleNextTip}
+					className="text-xs text-muted-foreground hover:text-primary hover:bg-white/50"
+				>
+					Nächster Tipp <ChevronRight className="ml-1 h-3 w-3" />
+				</Button>
 			</div>
 
 			<p className="text-xs text-muted-foreground mt-4">

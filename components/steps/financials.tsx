@@ -24,10 +24,15 @@ export const Financials: React.FC<StepProps> = ({ setData, data }) => {
 		equityForRealEstate: "Verfügbares Eigenkapital für Immobilien",
 	}
 
-	const tooltipContent: Partial<Record<keyof Step2Data, string>> = {
+const tooltipContent: Partial<Record<keyof Step2Data, string>> = {
+		income: 
+            "Alles, was Sie im Jahr netto einnehmen. Zum Beispiel Gehalt, Gewinne aus Ihrer Firma oder Mieteinnahmen.",
+		expenses: 
+            "Alles, was Sie im Jahr ausgeben. Zum Beispiel für Wohnen, Essen, Reisen, Autos oder Hobbys.",
 		assets:
-			"Dies ist Geld, auf das Sie schnell zugreifen können, z.B. Guthaben auf Giro- und Tagesgeldkonten oder Bargeld.",
-		liabilities: "Dies sind Ihre Schulden, z.B. Raten für Kredite, Hypotheken oder Leasingverträge.",
+			"Geld, auf das Sie schnell zugreifen können. Dazu zählen Girokonten, Sparbücher, Tagesgeld, Aktien oder Fonds. (Bitte hier keine Immobilien oder Firmenwerte mitrechnen.)",
+		liabilities: 
+            "Geld, das Sie der Bank oder anderen schulden. Zum Beispiel offene Kredite für Häuser, Autos oder andere Anschaffungen.",
 	}
 
 	return (

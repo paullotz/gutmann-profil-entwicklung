@@ -1,63 +1,64 @@
-import { ChartBarIcon, ArrowRightIcon, ShieldIcon, SparkleIcon } from "lucide-react";
+import { ChartBarIcon, ArrowRightIcon, SparkleIcon, FileTextIcon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 
 export const Start: React.FC<{ onNext: () => void }> = ({ onNext }) => (
 	<Card className="max-w-2xl mx-auto shadow-sm">
-		<CardHeader className="text-center space-y-2">
-			<CardTitle className="text-3xl md:text-4xl font-bold">Entdecken Sie Ihre finanzielle Zukunft.</CardTitle>
-			<CardDescription className="text-base md:text-lg">
-				Unser KI-gestützter Financial Health Check analysiert nicht nur Ihre Zahlen, sondern auch Ihre Ziele und Ihr
-				persönliches Verhältnis zu Geld. Erhalten Sie in wenigen Minuten eine ganzheitliche Einschätzung und klare
-				nächste Schritte.
+		<CardHeader className="text-center space-y-4">
+			<CardTitle className="text-3xl md:text-4xl font-bold font-serif">Ihr strategischer Kompass.</CardTitle>
+			<CardDescription className="text-base md:text-lg max-w-xl mx-auto">
+				Bereiten Sie Ihr Erstgespräch optimal vor. Unser intelligenter Assistent hilft Ihnen, Ihre finanzielle DNA zu entschlüsseln damit wir im persönlichen Gespräch direkt über Strategien sprechen können, statt über Stammdaten.
 			</CardDescription>
 		</CardHeader>
-		<CardContent className="space-y-6">
-			<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
-				<div className="flex items-start gap-3">
-					<div className="bg-muted p-2.5 rounded-lg shrink-0">
-						<ChartBarIcon />
+		<CardContent className="space-y-8 pt-4">
+			<div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-left">
+				<div className="flex items-start gap-4">
+					<div className="bg-primary/10 p-3 rounded-full shrink-0 text-primary">
+						<ChartBarIcon className="w-5 h-5" />
 					</div>
 					<div>
-						<h4 className="font-semibold text-sm">Ganzheitliche Analyse</h4>
-						<p className="text-sm text-muted-foreground">Wir betrachten Ihre Finanzen, Ziele und Ihr Mindset.</p>
+						<h4 className="font-semibold text-base mb-1">Status Quo Analyse</h4>
+						<p className="text-sm text-muted-foreground">Objektive Einordnung Ihrer aktuellen Vermögensstruktur.</p>
 					</div>
 				</div>
-				<div className="flex items-start gap-3">
-					<div className="bg-muted p-2.5 rounded-lg shrink-0">
-						<SparkleIcon />
+				<div className="flex items-start gap-4">
+					<div className="bg-primary/10 p-3 rounded-full shrink-0 text-primary">
+						<SparkleIcon className="w-5 h-5" />
 					</div>
 					<div>
-						<h4 className="font-semibold text-sm">KI-gestützte Einblicke</h4>
+						<h4 className="font-semibold text-base mb-1">Money Mindset</h4>
 						<p className="text-sm text-muted-foreground">
-							Profitieren Sie von modernster Technologie für Ihr Ergebnis.
+							Verstehen Sie, wie Emotionen Ihre Anlageentscheidungen beeinflussen.
 						</p>
 					</div>
 				</div>
-				<div className="flex items-start gap-3">
-					<div className="bg-muted p-2.5 rounded-lg shrink-0">
-						<ShieldIcon />
+                
+                {/* ÄNDERUNG: PDF-Report als "Win" eingefügt */}
+				<div className="flex items-start gap-4">
+					<div className="bg-primary/10 p-3 rounded-full shrink-0 text-primary">
+						<FileTextIcon className="w-5 h-5" />
 					</div>
 					<div>
-						<h4 className="font-semibold text-sm">100% Sicher & Anonym</h4>
+						<h4 className="font-semibold text-base mb-1">Ihr Exklusiv-Report</h4>
 						<p className="text-sm text-muted-foreground">
-							Ihre Daten werden vertraulich behandelt und nicht gespeichert.
+							Sie erhalten eine detaillierte PDF Auswertung Ihrer Strategie als Download für Ihre Unterlagen.
 						</p>
 					</div>
 				</div>
-				<div className="flex items-start gap-3">
-					<div className="bg-muted p-2.5 rounded-lg shrink-0">
-						<ArrowRightIcon />
+
+				<div className="flex items-start gap-4">
+					<div className="bg-primary/10 p-3 rounded-full shrink-0 text-primary">
+						<ArrowRightIcon className="w-5 h-5" />
 					</div>
 					<div>
-						<h4 className="font-semibold text-sm">Konkrete nächste Schritte</h4>
-						<p className="text-sm text-muted-foreground">Erhalten Sie eine klare Handlungsempfehlung.</p>
+						<h4 className="font-semibold text-base mb-1">Ihr Beratungscode</h4>
+						<p className="text-sm text-muted-foreground">Der Schlüssel für den nahtlosen Einstieg bei Ihrem Berater.</p>
 					</div>
 				</div>
 			</div>
-			<div className="pt-2">
-				<Button onClick={onNext} className="w-full" size="lg">
-					Jetzt Check starten
+			<div className="pt-4 flex justify-center">
+				<Button onClick={onNext} className="w-full sm:w-auto px-8 py-6 text-lg" size="lg">
+					Analyse starten
 				</Button>
 			</div>
 		</CardContent>

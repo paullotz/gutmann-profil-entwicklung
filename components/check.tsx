@@ -16,7 +16,7 @@ const TOTAL_STEPS = 6
 
 const initialFormData: FormData = {
 	step1: {
-		lifePhase: "Berufseinsteiger",
+		lifePhase: "Next Generation",
 		goals: { retirement: false, realEstate: false, wealth: false, other: false },
 		goalDetails: {
 			retirement: { priority: 50, horizon: "20+ Jahre" },
