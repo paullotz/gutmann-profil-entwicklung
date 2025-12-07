@@ -83,7 +83,7 @@ export function generateRiskQuestions(data: Pick<FormData, 'step1' | 'step2' | '
     questions.push(getDiversificationQuestion());
   }
   
-  return questions.slice(0, 3);
+  return questions.slice(0, 2);
 }
 
 function getLossAversionQuestion(netWorth: number): RiskQuestion {

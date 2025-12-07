@@ -11,6 +11,7 @@ import { Mindset } from "./steps/mindset"
 import { ScenarioSimulation } from "./steps/scenario-simulation"
 import { Results } from "./steps/results"
 import { RiskProfile } from "./steps/risk-profile"
+import { ChevronLeft } from "lucide-react"
 
 const TOTAL_STEPS = 6
 
@@ -58,11 +59,12 @@ export const CheckRouter = () => {
             <div className="w-full max-w-2xl mx-auto">
                 <header className="mb-8">
                     {currentStep > 0 && currentStep < TOTAL_STEPS && (
-                        <div className="mb-4">
-                            <Progress value={progress} />
-                            <p className="text-sm text-right mt-1 text-muted-foreground">
-                                Schritt {currentStep} von {TOTAL_STEPS - 1}
-                            </p>
+                        <div className="mb-6 space-y-2">
+                            <div className="flex text-sm font-medium text-muted-foreground">
+                                <span className="text-primary font-bold">Schritt {currentStep} von {TOTAL_STEPS - 1}</span>
+                            </div>
+                            
+                            <Progress value={progress} className="h-2" />
                         </div>
                     )}
                 </header>
@@ -70,11 +72,13 @@ export const CheckRouter = () => {
                 <main>{renderCurrentStep()}</main>
 
                 {currentStep > 0 && currentStep < TOTAL_STEPS && (
-                    <footer className="mt-8 flex justify-between">
-                        <Button variant="outline" onClick={prevStep}>
-                            Zurück
+                    <footer className="mt-8 flex justify-between items-center">
+                        <Button variant="ghost" onClick={prevStep} className="text-muted-foreground hover:text-foreground">
+                            <ChevronLeft className="mr-1 h-4 w-4"/>Zurück
                         </Button>
-                        <Button onClick={nextStep}>{currentStep === TOTAL_STEPS - 1 ? "Analyse ansehen" : "Weiter"}</Button>
+                        <Button onClick={nextStep} className="px-8">
+                            {currentStep === TOTAL_STEPS - 1 ? "Zur Analyse" : "Weiter"}
+                        </Button>
                     </footer>
                 )}
             </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Image, DocumentProps } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, DocumentProps } from '@react-pdf/renderer';
 import type { FormData, GeminiAnalysis } from '@/lib/types';
 
 const styles = StyleSheet.create({
@@ -195,7 +195,7 @@ export const FinancialCheckPDF: React.FC<DocumentProps & Props> = ({ formData, a
         </View>
 
         <Text style={styles.footer}>
-          Bank Gutmann Financial Health Check | Vertraulich
+          Gutmann Kompass | Vertraulich
         </Text>
       </Page>
 
@@ -235,7 +235,7 @@ export const FinancialCheckPDF: React.FC<DocumentProps & Props> = ({ formData, a
         </View>
 
         <Text style={styles.footer}>
-          Bank Gutmann Financial Health Check | Vertraulich | Seite 2
+          Gutmann Kompass | Vertraulich | Seite 2
         </Text>
       </Page>
     </Document>
