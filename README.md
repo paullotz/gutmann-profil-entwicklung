@@ -1,4 +1,4 @@
-# Financial Health Check
+# Gutmann Kompass
 
 ## Projektübersicht
 
